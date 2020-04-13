@@ -323,7 +323,7 @@ function love.update(dt)
 	
 	--delete creatures that aren't in use
 	for i=1, #allCreatures, 1 do
-		if allCreatures[i].hp <= 0 then
+		if allCreatures[i] ~= nil and allCreatures[i].hp <= 0 then
 			tempBlk = accessWldBlock(math.floor(allCreatures[i].x), math.floor(allCreatures[i].y))
 			if tempBlk ~= nil then
 				tempBlk.rotCreature = tempBlk.rotCreature + 50
@@ -478,6 +478,8 @@ function love.update(dt)
 				unlockedMammal = true
 				creatureMam[updateIndexNoIndexWld] = creatureMam[updateIndexNoIndexWld] + 1
 			end
+			
+			--creature.age = creature.age + (0.0001 * dt)
 		end
 	end
 	

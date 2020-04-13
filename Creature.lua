@@ -50,6 +50,7 @@ class "Creature"-- : extends(classlib)
 	checkTimer = 0, checkTimerMax = 0,
 	targetX = 0, targetY = 0,
 	currentSpeedMultiplier = 0,
+	age = 0,
 }
 
 --also for creature birth
@@ -80,6 +81,7 @@ function Creature:__init(id, x, y, foodA, foodB, attackA, attackB, birthSize, ma
 	self.targetX = x
 	self.targetY = y
 	self.currentSpeedMultiplier = 1
+	self.age = 0
 end
 
 function Creature:getLifeStats()
@@ -116,7 +118,7 @@ function Creature:updateSpeed()
 end
 
 function Creature:testIsFood(blk)
-	--test for planktondddddddddddddddd
+	--test for plankton
 	if (self.foodA == -4 or self.foodB == -4) and blk.seaAntLife > 0 then
 		return blk.seaAntLife
 	--test for coral
