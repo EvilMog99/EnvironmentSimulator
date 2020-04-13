@@ -9,7 +9,7 @@ local allBlocks = {} --array of Block arrays
 function love.load()
 	face = love.graphics.newImage("face.png")
 	wldX, wldY = -20, -20
-	blkW, blkH = 20, 20
+	blkW, blkH = 5, 5
 	moveUp, moveDown, moveLeft, moveRight = false, false, false, false
 	updateCol = 1 --for setting which column will be updated next
 	--windowWidth, windowHeight = love.window.getDimensions()
@@ -17,10 +17,10 @@ function love.load()
 	dbVal = ""
 	
 	xLoop_start = 1
-	xLoop_end = 40
+	xLoop_end = 170 -- set world width
 	xLoop_inc = 1
 	yLoop_start = 1
-	yLoop_end = 30
+	yLoop_end = 130 -- set world height
 	yLoop_inc = 1
 	for i=xLoop_start, xLoop_end, xLoop_inc do
 		allBlocks[i] = {}
@@ -33,6 +33,15 @@ function love.load()
 	buildSea(6, 15, 10, 10)
 	buildSea(22, 15, 15, 12)
 	buildSea(20, 8, 5, 5)
+	buildSea(30, 10, 20, 50)
+	buildSea(20, 30, 50, 20)
+	
+	buildSea(100, 10, 50, 30)
+	buildSea(20, 100, 50, 50)
+	buildSea(150, 10, 30, 80)
+	buildSea(20, 150, 100, 30)
+	
+	buildSea(20, 20, 130, 90)
 	
 	buildVolcano(10, 5, 3, 3)
 	buildVolcano(35, 20, 4, 7)
@@ -61,26 +70,28 @@ function love.update(dt)
 		updateCol = 1
 	end
 	
-	for j=yLoop_start, yLoop_end, yLoop_inc do
-		allBlocks[updateCol][j]:defineType()
-		
-		if testBlockExists(updateCol + 1, j) then
-			allBlocks[updateCol][j]:interact(allBlocks[updateCol + 1][j])
-		end
-		if testBlockExists(updateCol - 1, j) then
-			allBlocks[updateCol][j]:interact(allBlocks[updateCol - 1][j])
-		end
-		if testBlockExists(updateCol, j + 1) then
-			allBlocks[updateCol][j]:interact(allBlocks[updateCol][j + 1])
-		end
-		if testBlockExists(updateCol, j -  1) then
-			allBlocks[updateCol][j]:interact(allBlocks[updateCol][j - 1])
-		end
-		
-		allBlocks[updateCol][j]:resetAfterUpdate()
-		
-		if love.math.random(1, 10000) == 2 then
-			buildVolcano(updateCol, j, love.math.random(1, 8), love.math.random(1, 8))
+	for updateCol=xLoop_start, xLoop_end, xLoop_inc do
+		for j=yLoop_start, yLoop_end, yLoop_inc do
+			allBlocks[updateCol][j]:defineType()
+			
+			if testBlockExists(updateCol + 1, j) then
+				allBlocks[updateCol][j]:interact(allBlocks[updateCol + 1][j])
+			end
+			if testBlockExists(updateCol - 1, j) then
+				allBlocks[updateCol][j]:interact(allBlocks[updateCol - 1][j])
+			end
+			if testBlockExists(updateCol, j + 1) then
+				allBlocks[updateCol][j]:interact(allBlocks[updateCol][j + 1])
+			end
+			if testBlockExists(updateCol, j -  1) then
+				allBlocks[updateCol][j]:interact(allBlocks[updateCol][j - 1])
+			end
+			
+			allBlocks[updateCol][j]:resetAfterUpdate()
+			
+			if love.math.random(1, 100000) == 2 then
+				buildVolcano(updateCol, j, love.math.random(1, 30), love.math.random(1, 30))
+			end
 		end
 	end
 	
@@ -182,8 +193,8 @@ function drawBlock(blk, x, y)
 			love.graphics.circle("fill", x + wldX + (blkW / 2), y + wldY + (blkH / 2), blk.plantLife/200 * blkW, 5)
 		end
 		
-		love.graphics.setColor(0, 0, 0)
-		love.graphics.rectangle("line", x + wldX, y + wldY, blkW, blkH)
+		--love.graphics.setColor(0, 0, 0)
+		--love.graphics.rectangle("line", x + wldX, y + wldY, blkW, blkH)
 	end
 
 end

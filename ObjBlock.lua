@@ -33,7 +33,7 @@ class "Block"-- : extends(classlib)
 	hp = 100, maxhp = 100,
 	timer = 0, maxTimer = 60,
 	canSpread = false,
-	heat = 0, water = 0, plantLife = 0,
+	heat = 0, water = 0, plantLife = 0, steam = 0,
 --make sure to include all above in copy func
 
 	moveX = function(self, addx)
@@ -64,6 +64,7 @@ function Block:__init(newId)
 	self.heat = 0
 	self.water = 0
 	self.plantLife = 0
+	self.steam = 0
 	hp = 100
 	maxhp = 100
 end
@@ -76,6 +77,7 @@ function Block:copy(target)
 	target.heat = self.heat
 	target.water = self.water
 	target.plantLife = self.plantLife
+	target.steam = self.steam
 	target.hp = self.hp
 	target.maxhp = self.maxhp
 end
@@ -94,7 +96,7 @@ function Block:defineType()
 			self.plantLife = 200
 		end
 	else if self.id ~= 0 and self.id ~= 4 and self.water > 5 and self.heat > 5 and love.math.random(1, 1000) == 2 then
-		self.plantLife = 1
+		--self.plantLife = 1
 	end end
 end
 
@@ -137,6 +139,10 @@ function Block:interact(neighbour)
 				neighbour.id = 4 --lava
 			end
 		end
+		
+		if self.water > 0 then
+			self:evaporateWater()
+		end
 	end end end end
 	
 	if self.plantLife > 5 and neighbour.id ~= 0 and neighbour.id ~= 4 then
@@ -144,6 +150,22 @@ function Block:interact(neighbour)
 	end
 	
 	self:checkValues()
+end
+
+function Block:evaporateWater()
+	if self.water > 10 and self.heat > 109 then
+		self.water = self.water - 10
+		self.steam = self.steam + 10
+		self.heat = self.heat - 10
+	else if self.water > 0 and self.heat > 99 then
+		self.water = self.water - 1
+		self.steam = self.steam + 1
+		self.heat = self.heat - 1
+	end end
+end
+
+function Block:condensateWater()
+	
 end
 
 function Block:checkValues()
