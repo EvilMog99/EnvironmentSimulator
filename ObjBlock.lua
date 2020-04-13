@@ -96,7 +96,7 @@ function Block:copy(target)
 	target.maxhp = self.maxhp
 end
 
-function Block:defineType()
+function Block:defineType(landPlantNoInWld, seaPlantNoInWld)
 	if self.id == blktype.lava then
 		--self.landPlantLife = 0
 		--self.seaPlantLife = 0
@@ -116,8 +116,8 @@ function Block:defineType()
 		if self.landPlantLife > 200 then
 			self.landPlantLife = 200
 		end
-	else if self.id ~= 0 and self.id ~= 4 and self.water > landPlantMinWater and self.heat > landPlantMinHeat and love.math.random(1, 1000000) == 2 then
-		self.landPlantLife = 1
+	else if landPlantNoInWld > 0 and self.id ~= 0 and self.id ~= 4 and self.water > landPlantMinWater and self.heat > landPlantMinHeat and love.math.random(1, 100000) == 2 then
+		self.landPlantLife = 1 --only spawn lant plants if they exist in the world
 	end end
 	
 	--for sea plant life
@@ -130,8 +130,8 @@ function Block:defineType()
 		if self.seaPlantLife > 200 then
 			self.seaPlantLife = 200
 		end
-	else if self.id == 0 and self.water > seaPlantMinWater and self.heat > seaPlantMinHeat and love.math.random(1, 1000000) == 2 then
-		self.seaPlantLife = 1
+	else if (seaPlantNoInWld > 0 or (seaPlantNoInWld == 0 and love.math.random(1, 10000))) and self.id == 0 and self.water > seaPlantMinWater and self.heat > seaPlantMinHeat and love.math.random(1, 100000) == 2 then
+		self.seaPlantLife = 1 --only spawn sea plants if they exist in the world - or these can be spawned as the first type of life
 	end end
 	
 	--for fish life
@@ -213,6 +213,8 @@ function Block:interact(neighbour)
 			neighbour.seaPlantLife = neighbour.seaPlantLife + 40
 			self.seaPlantLife = self.seaPlantLife - 40
 		end
+	elseif love.math.random(1, 10000) == 2 and self.seaPlantLife > 5 and neighbour.landPlantLife == 0 and neighbour.water > landPlantMinWater and neighbour.heat > landPlantMinHeat and neighbour.id ~= 0 and neighbour.id ~= 4 then --try to evolve to go on land
+		neighbour.landPlantLife = 1
 	end
 	
 	self:checkValues()
@@ -251,7 +253,7 @@ function Block:checkValues()
 		if self.hp <= 0 then
 			self.id = 0 --empty
 			self.hp = self.maxhp
-		else if self.water > 60 then
+		else if self.water > 80 then
 			self.hp = self.hp - (self.water / 30)
 		end end
 		
@@ -259,7 +261,7 @@ function Block:checkValues()
 		if self.hp <= 0 then
 			self.id = 3 --sand
 			self.hp = self.maxhp
-		else if self.water > 30 then
+		else if self.water > 40 then
 			self.hp = self.hp - (self.water / 30)
 		
 		if self.heat > 80 then

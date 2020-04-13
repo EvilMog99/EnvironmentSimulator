@@ -14,6 +14,11 @@ forceWinter = 0
 volcanoRage = 0
 volcanoRageMax = 100
 
+updateIndexNoIndexWld = 1
+readIndexNoIndexWld = 2
+landPlantNoInWld = {0, 0}
+seaPlantNoInWld = {0, 0}
+
 function love.load()
 	face = love.graphics.newImage("face.png")
 	wldX, wldY = -20, -20
@@ -22,6 +27,11 @@ function love.load()
 	updateCol = 1 --for setting which column will be updated next
 	--windowWidth, windowHeight = love.window.getDimensions()
 	volcanoRage = volcanoRageMax -- how frequent volcanoes spawn - starting at 0 makes it nice and slow
+	
+	updateIndexNoIndexWld = 1
+	readIndexNoIndexWld = 2
+	landPlantNoInWld = {0, 0}
+	seaPlantNoInWld = {0, 0}
 	
 	dbVal = ""
 	
@@ -63,6 +73,18 @@ end
 
 function love.update(dt)
 	dbVal = ""
+	--update life counting index
+	if updateIndexNoIndexWld == 1 then
+		updateIndexNoIndexWld = 2
+		readIndexNoIndexWld = 1
+	else
+		updateIndexNoIndexWld = 1
+		readIndexNoIndexWld = 2
+	end
+	landPlantNoInWld[updateIndexNoIndexWld] = 0
+	seaPlantNoInWld[updateIndexNoIndexWld] = 0
+	
+	--update movement
 	if moveUp then
 		Player:moveY(-1 * (dt + 1))
 	else if moveDown then
@@ -103,8 +125,17 @@ function love.update(dt)
 	lavaCount = 0
 	for updateCol=xLoop_start, xLoop_end, xLoop_inc do
 		for j=yLoop_start, yLoop_end, yLoop_inc do
-			allBlocks[updateCol][j]:defineType()
+			allBlocks[updateCol][j]:defineType(landPlantNoInWld[readIndexNoIndexWld], seaPlantNoInWld[readIndexNoIndexWld])
 			
+			--count what life exists in this block
+			if allBlocks[updateCol][j].landPlantLife > 0 then
+				landPlantNoInWld[updateIndexNoIndexWld] = landPlantNoInWld[updateIndexNoIndexWld] + 1
+			end
+			if allBlocks[updateCol][j].seaPlantLife > 0 then
+				seaPlantNoInWld[updateIndexNoIndexWld] = seaPlantNoInWld[updateIndexNoIndexWld] + 1
+			end
+			
+			--run block interaction
 			if testBlockExists(updateCol + 1, j) then
 				allBlocks[updateCol][j]:interact(allBlocks[updateCol + 1][j])
 			end
@@ -145,7 +176,7 @@ function love.update(dt)
 				buildVolcano(updateCol, j, love.math.random(1, 40), love.math.random(1, 40))
 			elseif allBlocks[updateCol][j].id == 4 and love.math.random(1, 10000) == 2 then
 				buildVolcano(updateCol, j, love.math.random(1, 5), love.math.random(1, 5))--support volcanoes
-			elseif (allBlocks[updateCol][j].id == 4 and love.math.random(1, 1000) == 2) 
+			elseif (allBlocks[updateCol][j].id == 4 and love.math.random(1, 100000000) == 2) 
 				or (allBlocks[updateCol][j].id ~= 4 and love.math.random(1, 1000000) == 2) then
 				buildVolcano(updateCol, j, love.math.random(1, 30), love.math.random(1, 30))--create volcanoes
 			end
@@ -220,7 +251,11 @@ function love.draw()
 	drawCharacter(Player)
 	
 	love.graphics.setColor(1, 1, 1, 1)
-	love.graphics.print("Debug: " .. dbVal, 100, 0)
+	love.graphics.print("Weather: " .. dbVal, 100, 0)
+	love.graphics.print("Coral:", 100, 11)
+	love.graphics.print("" .. seaPlantNoInWld[readIndexNoIndexWld], 140, 11)
+	love.graphics.print("Plants:", 100, 22)
+	love.graphics.print("" .. landPlantNoInWld[readIndexNoIndexWld], 140, 22)
 end
 
 local getMaterialColor = {
