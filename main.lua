@@ -16,6 +16,8 @@ volcanoRageMax = 100
 
 updateIndexNoIndexWld = 1
 readIndexNoIndexWld = 2
+landAntNoInWld = {0, 0}
+seaAntNoInWld = {0, 0}
 landPlantNoInWld = {0, 0}
 seaPlantNoInWld = {0, 0}
 
@@ -30,6 +32,8 @@ function love.load()
 	
 	updateIndexNoIndexWld = 1
 	readIndexNoIndexWld = 2
+	landAntNoInWld = {0, 0}
+	seaAntNoInWld = {0, 0}
 	landPlantNoInWld = {0, 0}
 	seaPlantNoInWld = {0, 0}
 	
@@ -81,6 +85,8 @@ function love.update(dt)
 		updateIndexNoIndexWld = 1
 		readIndexNoIndexWld = 2
 	end
+	landAntNoInWld[updateIndexNoIndexWld] = 0
+	seaAntNoInWld[updateIndexNoIndexWld] = 0
 	landPlantNoInWld[updateIndexNoIndexWld] = 0
 	seaPlantNoInWld[updateIndexNoIndexWld] = 0
 	
@@ -125,9 +131,15 @@ function love.update(dt)
 	lavaCount = 0
 	for updateCol=xLoop_start, xLoop_end, xLoop_inc do
 		for j=yLoop_start, yLoop_end, yLoop_inc do
-			allBlocks[updateCol][j]:defineType(landPlantNoInWld[readIndexNoIndexWld], seaPlantNoInWld[readIndexNoIndexWld])
+			allBlocks[updateCol][j]:defineType(landAntNoInWld[updateIndexNoIndexWld], seaAntNoInWld[updateIndexNoIndexWld], landPlantNoInWld[readIndexNoIndexWld], seaPlantNoInWld[readIndexNoIndexWld])
 			
 			--count what life exists in this block
+			if allBlocks[updateCol][j].landAntLife > 0 then
+				landAntNoInWld[updateIndexNoIndexWld] = landAntNoInWld[updateIndexNoIndexWld] + 1
+			end
+			if allBlocks[updateCol][j].seaAntLife > 0 then
+				seaAntNoInWld[updateIndexNoIndexWld] = seaAntNoInWld[updateIndexNoIndexWld] + 1
+			end
 			if allBlocks[updateCol][j].landPlantLife > 0 then
 				landPlantNoInWld[updateIndexNoIndexWld] = landPlantNoInWld[updateIndexNoIndexWld] + 1
 			end
@@ -252,10 +264,14 @@ function love.draw()
 	
 	love.graphics.setColor(1, 1, 1, 1)
 	love.graphics.print("Weather: " .. dbVal, 100, 0)
-	love.graphics.print("Coral:", 100, 11)
-	love.graphics.print("" .. seaPlantNoInWld[readIndexNoIndexWld], 140, 11)
-	love.graphics.print("Plants:", 100, 22)
-	love.graphics.print("" .. landPlantNoInWld[readIndexNoIndexWld], 140, 22)
+	love.graphics.print("Plankton:", 100, 11)
+	love.graphics.print("" .. seaAntNoInWld[readIndexNoIndexWld], 160, 11)
+	love.graphics.print("Ants:", 100, 22)
+	love.graphics.print("" .. landAntNoInWld[readIndexNoIndexWld], 160, 22)
+	love.graphics.print("Coral:", 100, 33)
+	love.graphics.print("" .. seaPlantNoInWld[readIndexNoIndexWld], 160, 33)
+	love.graphics.print("Plants:", 100, 44)
+	love.graphics.print("" .. landPlantNoInWld[readIndexNoIndexWld], 160, 44)
 end
 
 local getMaterialColor = {
@@ -296,6 +312,16 @@ function drawBlock(blk, x, y)
 		love.graphics.setColor(blk.heat / 200, 0, blk.water / 200, 0.5)
 		love.graphics.rectangle("fill", x + wldX, y + wldY, blkW, blkH)
 		
+		if blk.seaAntLife > 0 then
+			love.graphics.setColor(0, 0.6, 0.4, 1)
+			drawAnts(x + wldX, y + wldY, blk.seaAntLife)
+			--love.graphics.circle("fill", x + wldX + (blkW / 2), y + wldY + (blkH / 2), blk.seaAntLife/200 * (blkW / 2), 5)
+		end
+		if blk.landAntLife > 0 then
+			love.graphics.setColor(0.5, 1, 0, 1)
+			drawAnts(x + wldX, y + wldY, blk.landAntLife)
+			--love.graphics.circle("fill", x + wldX + (blkW / 2), y + wldY + (blkH / 2), blk.landAntLife/200 * (blkW / 2), 5)
+		end
 		if blk.seaPlantLife > 0 then
 			love.graphics.setColor(0, 0.7, 0.7, 1)
 			love.graphics.circle("fill", x + wldX + (blkW / 2), y + wldY + (blkH / 2), blk.seaPlantLife/200 * (blkW / 2), 5)
@@ -313,6 +339,24 @@ function drawBlock(blk, x, y)
 		--love.graphics.rectangle("line", x + wldX, y + wldY, blkW, blkH)
 	end
 
+end
+
+function drawAnts(x, y, level)
+	if level > 0 then
+		love.graphics.rectangle("fill", x + 2, y + 2, 1, 1)
+	end
+	if level > 40 then
+		love.graphics.rectangle("fill", x + 2, y + 1, 1, 1)
+	end
+	if level > 80 then
+		love.graphics.rectangle("fill", x + 4, y, 1, 1)
+	end
+	if level > 120 then
+		love.graphics.rectangle("fill", x, y + 2, 1, 1)
+	end
+	if level > 160 then
+		love.graphics.rectangle("fill", x + 1, y + 4, 1, 1)
+	end
 end
 
 function updateWldPosition()

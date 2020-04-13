@@ -19,10 +19,20 @@ blktype = {
 
 blktype = protect(blktype)
 
+landAntMaxHeat = 65
+landAntMinHeat = 10
+landAntMaxWater = 90
+landAntMinWater = 5
+
 landPlantMaxHeat = 65
 landPlantMinHeat = 10
 landPlantMaxWater = 90
 landPlantMinWater = 5
+
+seaAntMaxHeat = 60
+seaAntMinHeat = -1
+seaAntMaxWater = 450
+seaAntMinWater = 10
 
 seaPlantMaxHeat = 60
 seaPlantMinHeat = -1
@@ -43,7 +53,7 @@ class "Block"-- : extends(classlib)
 	hp = 100, maxhp = 100,
 	timer = 0, maxTimer = 60,
 	canSpread = false,
-	heat = 0, water = 0, landPlantLife = 0, seaPlantLife = 0, fishLife = 0, steam = 0,
+	heat = 0, water = 0, landAntLife = 0, landPlantLife = 0, seaAntLife = 0, seaPlantLife = 0, fishLife = 0, steam = 0,
 --make sure to include all above in copy func
 
 	moveX = function(self, addx)
@@ -73,6 +83,8 @@ function Block:__init(newId)
 	self.canSpread = false
 	self.heat = 0
 	self.water = 0
+	self.landAntLife = 0
+	self.seaAntLife = 0
 	self.landPlantLife = 0
 	self.seaPlantLife = 0
 	self.fishLife = 0
@@ -88,6 +100,8 @@ function Block:copy(target)
 	target.canSpread = self.canSpread
 	target.heat = self.heat
 	target.water = self.water
+	target.landAntLife = self.landAntLife
+	target.seaAntLife = self.seaAntLife
 	target.landPlantLife = self.landPlantLife
 	target.seaPlantLife = self.seaPlantLife
 	target.fishLife = self.fishLife
@@ -96,7 +110,7 @@ function Block:copy(target)
 	target.maxhp = self.maxhp
 end
 
-function Block:defineType(landPlantNoInWld, seaPlantNoInWld)
+function Block:defineType(landAntNoInWld, seaAntNoInWld, landPlantNoInWld, seaPlantNoInWld)
 	if self.id == blktype.lava then
 		--self.landPlantLife = 0
 		--self.seaPlantLife = 0
@@ -104,6 +118,34 @@ function Block:defineType(landPlantNoInWld, seaPlantNoInWld)
 		if self.heat > 100 then
 			self.canSpread = true
 		end
+	end
+
+	--for land ant life
+	if self.landAntLife > 0 then --if plant life exists at all
+		self.landAntLife = self.landAntLife + Block:calcPlantSurvival(self.heat, self.water, landAntMaxHeat, landAntMinHeat, landAntMaxWater, landAntMinWater) --calculate its survival	
+		if self.id == 0 or self.id == 4 then
+			self.landAntLife = self.landAntLife - 2
+		end
+		
+		if self.landAntLife > 200 then
+			self.landAntLife = 200
+		end
+	elseif landAntNoInWld > 0 and self.id ~= 0 and self.id ~= 4 and self.water > landAntMinWater and self.heat > landAntMinHeat and love.math.random(1, 100000) == 2 then
+		self.landAntLife = 1 --only spawn lant plants if they exist in the world
+	end
+	
+	--for sea ant life
+	if self.seaAntLife > 0 then --if plant life exists at all
+		self.seaAntLife = self.seaAntLife + (Block:calcPlantSurvival(self.heat, self.water, seaAntMaxHeat, seaAntMinHeat, seaAntMaxWater, seaAntMinWater) * 1) --calculate its survival	
+		if self.id ~= 0 then
+			self.seaAntLife = self.seaAntLife - 3
+		end
+		
+		if self.seaAntLife > 200 then
+			self.seaAntLife = 200
+		end
+	elseif (seaAntNoInWld > 0 or (seaAntNoInWld == 0 and love.math.random(1, 10000))) and self.id == 0 and self.water > seaAntMinWater and self.heat > seaAntMinHeat and love.math.random(1, 100000) == 2 then
+		self.seaAntLife = 1 --only spawn sea plants if they exist in the world - or these can be spawned as the first type of life
 	end
 	
 	--for land plant life
@@ -116,9 +158,9 @@ function Block:defineType(landPlantNoInWld, seaPlantNoInWld)
 		if self.landPlantLife > 200 then
 			self.landPlantLife = 200
 		end
-	else if landPlantNoInWld > 0 and self.id ~= 0 and self.id ~= 4 and self.water > landPlantMinWater and self.heat > landPlantMinHeat and love.math.random(1, 100000) == 2 then
+	elseif landPlantNoInWld > 0 and self.id ~= 0 and self.id ~= 4 and self.water > landPlantMinWater and self.heat > landPlantMinHeat and love.math.random(1, 100000) == 2 then
 		self.landPlantLife = 1 --only spawn lant plants if they exist in the world
-	end end
+	end
 	
 	--for sea plant life
 	if self.seaPlantLife > 0 then --if plant life exists at all
@@ -130,9 +172,9 @@ function Block:defineType(landPlantNoInWld, seaPlantNoInWld)
 		if self.seaPlantLife > 200 then
 			self.seaPlantLife = 200
 		end
-	else if (seaPlantNoInWld > 0 or (seaPlantNoInWld == 0 and love.math.random(1, 10000))) and self.id == 0 and self.water > seaPlantMinWater and self.heat > seaPlantMinHeat and love.math.random(1, 100000) == 2 then
+	elseif seaPlantNoInWld > 0 and self.id == 0 and self.water > seaPlantMinWater and self.heat > seaPlantMinHeat and love.math.random(1, 100000) == 2 then
 		self.seaPlantLife = 1 --only spawn sea plants if they exist in the world - or these can be spawned as the first type of life
-	end end
+	end
 	
 	--for fish life
 	if self.fishLife > 0 then --if plant life exists at all
@@ -144,9 +186,9 @@ function Block:defineType(landPlantNoInWld, seaPlantNoInWld)
 		if self.fishLife > 200 then
 			self.fishLife = 200
 		end
-	else if self.id == 0 and self.water > 5 and self.heat > 1 and love.math.random(1, 1000000) == 2 then
+	elseif self.id == 0 and self.water > 5 and self.heat > 1 and love.math.random(1, 1000000) == 2 then
 		self.fishLife = 1
-	end end
+	end
 end
 
 function Block:calcPlantSurvival(heat, water, htMax, htMin, wtMax, wtMin)
@@ -195,6 +237,24 @@ function Block:interact(neighbour)
 			self:evaporateWater()
 		end
 	end end end end
+
+	--spread sea ant life
+	if self.seaAntLife > 5 and neighbour.seaAntLife == 0 then
+		if neighbour.id == 0 then
+			neighbour.seaAntLife = 1
+		end
+	elseif love.math.random(1, 10000) == 2 and self.seaAntLife > 5 and neighbour.seaAntLife > 0 and neighbour.seaPlantLife == 0 and neighbour.water > seaPlantMinWater and neighbour.heat > seaPlantMinHeat and neighbour.id == 0 then --try to evolve
+		neighbour.seaPlantLife = 1 -- create sea plant
+	elseif love.math.random(1, 10000) == 2 and self.landAntLife > 5 and neighbour.landPlantLife > 5  and neighbour.landAntLife == 0 and neighbour.water > landAntMinWater and neighbour.heat > landAntMinHeat and neighbour.id ~= 0 and neighbour.id ~= 4 then --try to evolve
+		neighbour.landAntLife = 1 -- evolve land ant
+	end
+
+	--spread land ant life
+	if self.landAntLife > 5 and neighbour.landAntLife == 0 and neighbour.id ~= 0 and neighbour.id ~= 4 then
+		neighbour.landAntLife = 1
+	--[[elseif love.math.random(1, 10000) == 2 and self.landAntLife > 5 and neighbour.landPlantLife > 5  and neighbour.landAntLife == 0 and neighbour.water > landAntMinWater and neighbour.heat > landAntMinHeat and neighbour.id ~= 0 and neighbour.id ~= 4 then --try to evolve to go on land
+		neighbour.landAntLife = 1]]
+	end
 	
 	--spread land plant life
 	if self.landPlantLife > 5 and neighbour.landPlantLife == 0 and neighbour.id ~= 0 and neighbour.id ~= 4 then
@@ -214,7 +274,7 @@ function Block:interact(neighbour)
 			self.seaPlantLife = self.seaPlantLife - 40
 		end
 	elseif love.math.random(1, 10000) == 2 and self.seaPlantLife > 5 and neighbour.landPlantLife == 0 and neighbour.water > landPlantMinWater and neighbour.heat > landPlantMinHeat and neighbour.id ~= 0 and neighbour.id ~= 4 then --try to evolve to go on land
-		neighbour.landPlantLife = 1
+		neighbour.landPlantLife = 1 -- evolve land plant
 	end
 	
 	self:checkValues()
