@@ -20,13 +20,13 @@ blktype = {
 blktype = protect(blktype)
 
 landPlantMaxHeat = 65
-landPlantMinHeat = 5
+landPlantMinHeat = 10
 landPlantMaxWater = 90
 landPlantMinWater = 5
 
 seaPlantMaxHeat = 60
-seaPlantMinHeat = 2
-seaPlantMaxWater = 190
+seaPlantMinHeat = 1
+seaPlantMaxWater = 250
 seaPlantMinWater = 20
 
 fishMaxHeat = 65
@@ -109,20 +109,28 @@ function Block:defineType()
 	--for land plant life
 	if self.landPlantLife > 0 then --if plant life exists at all
 		self.landPlantLife = self.landPlantLife + Block:calcPlantSurvival(self.heat, self.water, landPlantMaxHeat, landPlantMinHeat, landPlantMaxWater, landPlantMinWater) --calculate its survival	
+		if self.id == 0 or self.id == 4 then
+			self.landPlantLife = self.landPlantLife - 2
+		end
+		
 		if self.landPlantLife > 200 then
 			self.landPlantLife = 200
 		end
-	else if self.id ~= 0 and self.id ~= 4 and self.water > landPlantMinWater and self.heat > landPlantMinHeat and love.math.random(1, 10000) == 2 then
+	else if self.id ~= 0 and self.id ~= 4 and self.water > landPlantMinWater and self.heat > landPlantMinHeat and love.math.random(1, 1000000) == 2 then
 		self.landPlantLife = 1
 	end end
 	
 	--for sea plant life
 	if self.seaPlantLife > 0 then --if plant life exists at all
 		self.seaPlantLife = self.seaPlantLife + Block:calcPlantSurvival(self.heat, self.water, seaPlantMaxHeat, seaPlantMinHeat, seaPlantMaxWater, seaPlantMinWater) --calculate its survival	
+		if self.id ~= 0 then
+			self.seaPlantLife = self.seaPlantLife - 2
+		end
+		
 		if self.seaPlantLife > 200 then
 			self.seaPlantLife = 200
 		end
-	else if self.id == 0 and self.water > seaPlantMinWater and self.heat > seaPlantMinHeat and love.math.random(1, 100000) == 2 then
+	else if self.id == 0 and self.water > seaPlantMinWater and self.heat > seaPlantMinHeat and love.math.random(1, 1000000) == 2 then
 		self.seaPlantLife = 1
 	end end
 	
@@ -138,35 +146,8 @@ function Block:defineType()
 end
 
 function Block:calcPlantSurvival(heat, water, htMax, htMin, wtMax, wtMin)
-	--[[ht = (plantMaxHeat - heat) + (heat - plantMinHeat)
-	wt = (plantMaxWater - water) + (water - plantMinWater)
-	if ht > 10 then
-		ht = 10
-	end
-	if wt > 10 then
-		wt = 10
-	end
-	
-	if wt < ht then
-		return wt
-	else 
-		return ht
-	end]]
-	
 	local wt = 0
 	local ht = 0
-	
-	--[[if heat > plantMaxHeat then
-		ht = plantMaxHeat - heat
-	else if heat < plantMinHeat then
-		ht = heat - plantMinHeat
-	end end
-	
-	if water > plantMaxWater then
-		wt = plantMaxWater - water
-	else if heat < plantMinWater then
-		wt = water - plantMinWater
-	end end]]
 	
 	if heat < htMax and heat > htMin then
 		ht = 1
@@ -218,7 +199,7 @@ function Block:interact(neighbour)
 	end
 	
 	--spread sea plant life
-	if self.seaPlantLife > 5 and neighbour.seaPlantLife == 0 and neighbour.id == 0 then
+	if self.seaPlantLife > 5 and neighbour.seaPlantLife == 0 and neighbour.water > seaPlantMinWater then--neighbour.id == 0 then
 		neighbour.seaPlantLife = 1
 	end
 	

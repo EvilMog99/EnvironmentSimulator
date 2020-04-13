@@ -8,6 +8,8 @@ allBlocks = {} --array of Block arrays
 allRainValue = 0
 rainTrigger = 1
 rainOnCycle = false
+lavaCount = 0
+forceRain = false
 
 function love.load()
 	face = love.graphics.newImage("face.png")
@@ -82,6 +84,12 @@ function love.update(dt)
 		rainOnCycle = false
 	end
 	
+	forceRain = false
+	if lavaCount > ((xLoop_end * yLoop_end) - 200) then
+		forceRain = true
+		dbVal = dbVal .. " + Forced Raining"
+	end
+	lavaCount = 0
 	for updateCol=xLoop_start, xLoop_end, xLoop_inc do
 		for j=yLoop_start, yLoop_end, yLoop_inc do
 			allBlocks[updateCol][j]:defineType()
@@ -109,6 +117,14 @@ function love.update(dt)
 			if rainOnCycle and allRainValue > 1 then
 				allBlocks[updateCol][j].water = allBlocks[updateCol][j].water + 0.5
 				allRainValue = allRainValue - 0.5
+			end
+			
+			if forceRain then
+				allBlocks[updateCol][j].water = allBlocks[updateCol][j].water + 0.5
+			end
+			
+			if allBlocks[updateCol][j].id == 4 then
+				lavaCount = lavaCount + 1
 			end
 			
 			if allBlocks[updateCol][j].id == 4 and love.math.random(1, 5000) == 2 then
@@ -226,11 +242,11 @@ function drawBlock(blk, x, y)
 		
 		if blk.seaPlantLife > 0 then
 			love.graphics.setColor(0, 0.7, 0.7, 1)
-			love.graphics.circle("fill", x + wldX + (blkW / 2), y + wldY + (blkH / 2), blk.landPlantLife/200 * (blkW / 2), 5)
+			love.graphics.circle("fill", x + wldX + (blkW / 2), y + wldY + (blkH / 2), blk.seaPlantLife/200 * (blkW / 2), 5)
 		end
 		if blk.landPlantLife > 0 then
 			love.graphics.setColor(0, 1, 0, 1)
-			love.graphics.circle("fill", x + wldX + (blkW / 2), y + wldY + (blkH / 2), blk.seaPlantLife/200 * (blkW / 2), 5)
+			love.graphics.circle("fill", x + wldX + (blkW / 2), y + wldY + (blkH / 2), blk.landPlantLife/200 * (blkW / 2), 5)
 		end
 		
 		--love.graphics.setColor(0, 0, 0)
