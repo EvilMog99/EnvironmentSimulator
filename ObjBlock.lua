@@ -292,15 +292,15 @@ function Block:evaporateWater()
 	if self.water > 10 and (self.heat > 109 or self.water > 210) then
 		self.water = self.water - 10
 		self.steam = self.steam + 10
-		self.heat = self.heat - 10
+		self.heat = self.heat - 20
 	else if self.water > 0 and self.heat > 99 then
 		self.water = self.water - 2
 		self.steam = self.steam + 2
-		self.heat = self.heat - 2
+		self.heat = self.heat - 4
 	else if self.water > 0 and self.heat > 1 then
 		self.water = self.water - 1
 		self.steam = self.steam + 1
-		self.heat = self.heat - 1
+		self.heat = self.heat - 2
 	end end end
 end
 

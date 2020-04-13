@@ -30,6 +30,13 @@ unlockedLandAnt = false
 
 romingSpeed = 200
 
+testColR = 0
+
+mouse_leftDown = false
+mouse_rightDown = false
+
+tempBlk = nil
+
 function love.load()
 	face = love.graphics.newImage("face.png")
 	wldPosX = 0
@@ -51,10 +58,10 @@ function love.load()
 	dbVal = ""
 	
 	xLoop_start = 1
-	xLoop_end = 300 --170 -- set world width
+	xLoop_end = 200 --170 -- set world width
 	xLoop_inc = 1
 	yLoop_start = 1
-	yLoop_end = 300 --130 -- set world height
+	yLoop_end = 200 --130 -- set world height
 	yLoop_inc = 1
 	for i=xLoop_start, xLoop_end, xLoop_inc do
 		allBlocks[i] = {}
@@ -91,6 +98,21 @@ function love.load()
 	windowSizeY = love.graphics.getHeight()
 end
 
+function love.mousepressed(x, y, button, istouch)
+	if button == 1 then -- left click
+		mouse_leftDown = true
+	elseif button == 2 then -- right click
+		mouse_rightDown = true
+	end
+end
+
+function love.mousereleased(x, y, button, istouch)
+	if button == 1 then -- left click
+		mouse_leftDown = false
+	elseif button == 2 then -- right click
+		mouse_rightDown = false
+	end
+end
 
 function love.update(dt)
 	dbVal = ""
@@ -130,6 +152,10 @@ function love.update(dt)
 		updateCol = 1
 	end
 	
+	if love.math.random(1, 5000) == 1 then
+		volcanoRage = 50
+	end
+	
 	if volcanoRage > 0 then
 		dbVal = dbVal .. "Volcano Rage: " .. volcanoRage .. " "
 	end
@@ -144,11 +170,26 @@ function love.update(dt)
 	forceRain = false
 	if lavaCount > ((xLoop_end * yLoop_end) - (xLoop_end * yLoop_end / 1.5)) then
 		forceWinter = 100
-		dbVal = dbVal .. " + Forced Winter " .. forceWinter .. " "
+		dbVal = dbVal .. " Forced Winter " .. forceWinter .. " "
+	elseif love.math.random(1, 5000) == 1 then
+		forceWinter = 50
+		dbVal = dbVal .. " Forced Winter " .. forceWinter .. " "
 	elseif forceWinter > 0 then
 		forceWinter = forceWinter - 1
-		dbVal = dbVal .. " + Forced Winter " .. forceWinter .. " "
+		dbVal = dbVal .. " Forced Winter " .. forceWinter .. " "
 	end
+	
+	--process mouse events
+	if mouse_leftDown then
+		--place block
+		tempBlk, success = getBlock((love.mouse.getX() + wldPosX) / blkW, (love.mouse.getY() + wldPosY) / blkH)
+		
+	end
+	if mouse_rightDown then
+		
+	end
+	
+	--process tiles
 	lavaCount = 0
 	for updateCol=xLoop_start, xLoop_end, xLoop_inc do
 		for j=yLoop_start, yLoop_end, yLoop_inc do
@@ -234,6 +275,14 @@ function love.update(dt)
 		volcanoRage = volcanoRage - 1
 	end
 	
+end
+
+function getBlock(x, y)
+	if testBlockExists(x, y) then
+		dbVal = dbVal .. " x: " .. x .. " y: " .. y
+		--return allBlocks[x][y], true
+	end
+	return nil, false
 end
 
 function testBlockExists(tx, ty)
@@ -357,7 +406,7 @@ local getMaterialColor = {
 
 function drawCharacter(chr)
 	if chr.id == 1 then
-		love.graphics.setColor(0, 0.6, 0.8, 0.9)
+		love.graphics.setColor(testColR, 0.6, 0.8, 0.9)
 	else
 		love.graphics.setColor(1, 0.2, 0.8, 0.9)
 	end
