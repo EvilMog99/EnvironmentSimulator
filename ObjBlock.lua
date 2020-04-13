@@ -48,7 +48,8 @@ class "Block"-- : extends(classlib)
 	hp = 200, maxhp = 200,
 	timer = 0, maxTimer = 60,
 	canSpread = false,
-	heat = 0, water = 0, landAntLife = 0, landPlantLife = 0, seaAntLife = 0, seaPlantLife = 0, evolveCreatureId = 0, steam = 0,
+	heat = 0, water = 0, landAntLife = 0, landPlantLife = 0, seaAntLife = 0, seaPlantLife = 0,
+	rotCreature = 0, evolveCreatureId = 0, steam = 0,
 --make sure to include all above in copy func
 
 	moveX = function(self, addx)
@@ -281,6 +282,12 @@ function Block:interact(neighbour)
 		end
 	elseif love.math.random(1, 100000) == 2 and self.seaPlantLife > 5 and neighbour.landPlantLife == 0 and neighbour.water > landPlantMinWater and neighbour.heat > landPlantMinHeat and neighbour.id ~= 0 and neighbour.id ~= 4 then --try to evolve to go on land
 		neighbour.landPlantLife = 1 -- evolve land plant
+	end
+	
+	if self.rotCreature > 0 then
+		self.rotCreature = self.rotCreature - 0.1
+	elseif self.rotCreature < 0 then
+		self.rotCreature = 0
 	end
 	
 	self:checkValues()

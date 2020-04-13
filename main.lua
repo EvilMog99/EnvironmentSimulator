@@ -270,9 +270,8 @@ function love.update(dt)
 					, 1, 0			-- Attack
 					, 1, blkW / 2	-- Size
 					))
-				
-				accessWldBlock(updateCol, j).evolveCreatureId = 0
 			end
+			accessWldBlock(updateCol, j).evolveCreatureId = 0
 			
 			accessWldBlock(updateCol, j):resetAfterUpdate()
 			
@@ -323,16 +322,29 @@ function love.update(dt)
 	end
 	
 	--delete creatures that aren't in use
-	for key, creature in pairs(allCreatures) do
+	for i=1, #allCreatures, 1 do
+		if allCreatures[i].hp <= 0 then
+			tempBlk = accessWldBlock(math.floor(allCreatures[i].x), math.floor(allCreatures[i].y))
+			if tempBlk ~= nil then
+				tempBlk.rotCreature = tempBlk.rotCreature + 50
+				if tempBlk.rotCreature > 200 then
+					tempBlk.rotCreature = 200
+				end
+			end
+			allCreatures[i] = nil
+			break
+		end
+	end
+	--[[for key, creature in pairs(allCreatures) do
 		if creature.hp <= 0 then
 			--creature = nil
 			break;
 		end
-		--[[if creature == nil or creature.hp <= 0 then
-			table.remove(allCreatures, key)
-			break;
-		end]]
-	end
+		--if creature == nil or creature.hp <= 0 then
+		--	table.remove(allCreatures, key)
+		--	break;
+		--end
+	end]]
 	
 	for key, creature in pairs(allCreatures) do
 		if creature.hp > 0 then
@@ -730,6 +742,22 @@ function drawBlock(blk, x, y)
 		love.graphics.setColor(blk.heat / 200, 0, blk.water / 200, 0.5)
 		love.graphics.rectangle("fill", x, y, blkW, blkH)
 		
+		if blk.rotCreature > 0 then
+			love.graphics.setColor(0.7, 0.6, 0, 0.8)
+			love.graphics.rectangle("fill", x + 0, y + 0, 8, 6)
+			if blk.rotCreature > 50 then
+				love.graphics.setColor(0.6, 0.5, 0, 0.8)
+				love.graphics.rectangle("fill", x + 2, y + 1, 2, 7)
+			end
+			if blk.rotCreature > 100 then
+				love.graphics.setColor(0.5, 0.7, 0, 0.8)
+				love.graphics.rectangle("fill", x + 6, y + 4, 3, 4)
+			end
+			if blk.rotCreature > 150 then
+				love.graphics.setColor(0.7, 0.8, 0, 0.8)
+				love.graphics.rectangle("fill", x + 3, y + 7, 5, 2)
+			end
+		end
 		if blk.seaPlantLife > 0 then
 			love.graphics.setColor(0, 0.6, 0.6, 1)
 			love.graphics.circle("fill", x + (blkW / 2), y + (blkH / 2), blk.seaPlantLife/200 * (blkW / 2), 5)

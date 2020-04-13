@@ -10,6 +10,7 @@ require("classlib")
 --  6 = Mammal				- Brown
 
 --foodA/B - What it can eat - Represented by: 
+-- -5 = rotCreature
 -- -4 = seaAnt
 -- -3 = seaPlant
 -- -2 = landPlant
