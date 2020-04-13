@@ -32,23 +32,23 @@ require("classlib")
 --class define
 class "Creature"-- : extends(classlib)
 {
-	animalId, 
-	x, y, --for x and y whole numbers are considered grid positions, decimals are their location in those blocks
-	foodA, foodB,
-	foodMin, foodMax, foodCurrent,
-	attackA, attackB, 
-	birthSize, maxSize, 
-	currentSize, 
+	animalId = 0, 
+	x = 0, y = 0, --for x and y whole numbers are considered grid positions, decimals are their location in those blocks
+	foodA = 0, foodB = 0,
+	foodMin = 0, foodMax = 0, foodCurrent = 0,
+	attackA = 0, attackB = 0, 
+	birthSize = 0, maxSize = 0, 
+	currentSize = 0, 
 	
-	moveX, moveY,
-	maxHeat, minHeat, maxWater, minWater,
-	maxSpeed,
-	hp, maxHp,
-	visionDis,
+	moveX = 0, moveY = 0,
+	maxHeat = 0, minHeat = 0, maxWater = 0, minWater = 0,
+	maxSpeed = 0,
+	hp = 0, maxHp = 0,
+	visionDis = 0,
 	
-	checkTimer, checkTimerMax,
-	targetX, targetY,
-	currentSpeedMultiplier,
+	checkTimer = 0, checkTimerMax = 0,
+	targetX = 0, targetY = 0,
+	currentSpeedMultiplier = 0,
 }
 
 --also for creature birth
@@ -58,9 +58,9 @@ function Creature:__init(id, x, y, foodA, foodB, attackA, attackB, birthSize, ma
 	self.y = y
 	self.foodA = foodA
 	self.foodB = foodB
-	self.foodMin = 5
+	self.foodMin = 10
 	self.foodMax = 200
-	self.foodCurrent = 100
+	self.foodCurrent = 50
 	self.attackA = attackA
 	self.attackB = attackB
 	self.birthSize = birthSize
@@ -148,6 +148,10 @@ function Creature:eatFood(blk)
 	else
 		self.checkTimer = -2 --allow creature to look for next place to move to
 	end
+end
+
+function Creature:reproduce()
+	
 end
 
 function Creature:update()

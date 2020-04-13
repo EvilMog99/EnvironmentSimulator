@@ -264,7 +264,7 @@ function love.update(dt)
 			accessWldBlock(updateCol, j):interact(accessWldBlock(updateCol, j - 1))
 			
 			--Create Invertebrate
-			if accessWldBlock(updateCol, j).evolveCreatureId == 1 and (creatureInvert[readIndexNoIndexWld] == 0 or (creatureInvert[readIndexNoIndexWld] > 0 and love.math.random(1, 1000) == 2)) then
+			if accessWldBlock(updateCol, j).evolveCreatureId == 1 and creatureInvert[readIndexNoIndexWld] == 0 then
 				table.insert(allCreatures, Creature:new(1, updateCol + (blkW / 20), j + (blkH / 20)
 					, -4, 0			-- Food
 					, 1, 0			-- Attack
@@ -354,13 +354,14 @@ function love.update(dt)
 				for i=-creature.visionDis, creature.visionDis, 1 do
 					for j=-creature.visionDis, creature.visionDis, 1 do
 						tempBlk = accessWldBlock(math.floor(creature.x + i), math.floor(creature.y + j))
-						--calculate how much food value this block has to this creature
-						if creature:testIsFood(tempBlk) > tempFoodVal or (creature:testIsFood(tempBlk) == tempFoodVal and love.math.random(1, 3) == 2) then
-							tempFoodVal = tempBlk.seaAntLife
-							creature.targetX = math.floor(creature.x + i)-- + 0.45
-							creature.targetY = math.floor(creature.y + j)-- + 0.45
+						if tempBlk ~= nill then
+							--calculate how much food value this block has to this creature
+							if creature:testIsFood(tempBlk) > tempFoodVal or (creature:testIsFood(tempBlk) == tempFoodVal and love.math.random(1, 3) == 2) then
+								tempFoodVal = tempBlk.seaAntLife
+								creature.targetX = math.floor(creature.x + i)-- + 0.45
+								creature.targetY = math.floor(creature.y + j)-- + 0.45
+							end
 						end
-						
 						--other food tests below
 						
 					end
@@ -407,7 +408,9 @@ function love.update(dt)
 			
 			tempBlk = accessWldBlock(math.floor(creature.x), math.floor(creature.y))
 			
-			if math.floor(math.floor(creature.x)) == creature.targetX and math.floor(math.floor(creature.y)) == creature.targetY then
+			if tempBlk == nil then
+				creature.checkTimer = -2
+			elseif math.floor(math.floor(creature.x)) == creature.targetX and math.floor(math.floor(creature.y)) == creature.targetY then
 				--eat stuff
 				--if this block has stuff which can be eaten and this creature is on half hunger (between max and min)
 				if creature:isHungry() and creature:testIsFood(tempBlk) then
@@ -419,16 +422,29 @@ function love.update(dt)
 				creature.checkTimer = -2
 			end
 
-			--[[if creature:isHungry() then -- if is hungry deduct hp
+			--heal with food
+			if creature.hp < creature.maxHp then
+				creature.hp = creature.hp + 0.1
+				creature.foodCurrent = creature.foodCurrent - 0.1
+			end
+
+			if creature:isHungry() then -- if is hungry deduct hp
 				creature.hp = creature.hp - 0.1
 			--if is half way grown, can have children
-			elseif creature.currentSize > creature.birthSize + ((creature.maxSize - creature.birthSize) / 2) then
-				
+			elseif creature.currentSize > creature.birthSize + ((creature.maxSize - creature.birthSize) / 2) and love.math.random(1, 100) == 2 then
+				if creature.animalId == 1 then --Invertebrate
+					creature.foodCurrent = creature.foodCurrent - (creature.foodMax / 10)
+					table.insert(allCreatures, Creature:new(1, creature.x, creature.y
+						, -4, 0			-- Food
+						, 1, 0			-- Attack
+						, 1, blkW / 2	-- Size
+						))
+				end
 			--if still can grow
 			elseif creature.currentSize < creature.maxSize then 
 				creature.currentSize = creature.currentSize + 0.1
 				creature.foodCurrent = creature.foodCurrent - 0.1
-			end]]
+			end
 			
 			--count creature as type
 			if creature.animalId == 1 then
@@ -702,6 +718,8 @@ function drawCreature(ct)
 		love.graphics.setColor(0.5, 0.5, 0.5, 0.5)
 	end
 	love.graphics.circle("fill", getRelevantBlockX((ct.x * blkW) + wldPosX + (ct.currentSize / 2)), getRelevantBlockY((ct.y * blkH) + wldPosY + (ct.currentSize / 2)), ct.currentSize, 6)
+	love.graphics.setColor(1, 0.2, 0.2, 1)
+	love.graphics.line(getRelevantBlockX((ct.x * blkW) + wldPosX + (ct.currentSize / 2)) - 2, getRelevantBlockY((ct.y * blkH) + wldPosY + (ct.currentSize / 2)), getRelevantBlockX((ct.x * blkW) + wldPosX + (ct.currentSize / 2)) + 2, getRelevantBlockY((ct.y * blkH) + wldPosY + (ct.currentSize / 2)))
 end
 
 function drawBlock(blk, x, y)
