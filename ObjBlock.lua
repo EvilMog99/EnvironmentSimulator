@@ -25,9 +25,9 @@ landPlantMaxWater = 90
 landPlantMinWater = 5
 
 seaPlantMaxHeat = 60
-seaPlantMinHeat = 1
+seaPlantMinHeat = -1
 seaPlantMaxWater = 250
-seaPlantMinWater = 20
+seaPlantMinWater = 10
 
 fishMaxHeat = 100
 fishMinHeat = 5
@@ -122,9 +122,9 @@ function Block:defineType()
 	
 	--for sea plant life
 	if self.seaPlantLife > 0 then --if plant life exists at all
-		self.seaPlantLife = self.seaPlantLife + Block:calcPlantSurvival(self.heat, self.water, seaPlantMaxHeat, seaPlantMinHeat, seaPlantMaxWater, seaPlantMinWater) --calculate its survival	
+		self.seaPlantLife = self.seaPlantLife + (Block:calcPlantSurvival(self.heat, self.water, seaPlantMaxHeat, seaPlantMinHeat, seaPlantMaxWater, seaPlantMinWater) * 1) --calculate its survival	
 		if self.id ~= 0 then
-			self.seaPlantLife = self.seaPlantLife - 2
+			self.seaPlantLife = self.seaPlantLife - 3
 		end
 		
 		if self.seaPlantLife > 200 then
@@ -203,8 +203,16 @@ function Block:interact(neighbour)
 	end
 	
 	--spread sea plant life
-	if self.seaPlantLife > 5 and neighbour.seaPlantLife == 0 and neighbour.water > seaPlantMinWater then--neighbour.id == 0 then
+	if self.seaPlantLife > 5 and neighbour.seaPlantLife == 0 and neighbour.water > seaPlantMinWater and neighbour.id == 0 then--neighbour.id == 0 then
 		neighbour.seaPlantLife = 1
+	elseif neighbour.seaPlantLife > 5 and neighbour.water > seaPlantMinWater and neighbour.id == 0 and neighbour.seaPlantLife < 140 then
+		if self.seaPlantLife > 100 then
+			neighbour.seaPlantLife = neighbour.seaPlantLife + 60
+			self.seaPlantLife = self.seaPlantLife - 60
+		elseif self.seaPlantLife > 50 then
+			neighbour.seaPlantLife = neighbour.seaPlantLife + 40
+			self.seaPlantLife = self.seaPlantLife - 40
+		end
 	end
 	
 	self:checkValues()

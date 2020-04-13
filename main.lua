@@ -10,6 +10,7 @@ rainTrigger = 1
 rainOnCycle = false
 lavaCount = 0
 forceRain = false
+forceWinter = 0
 volcanoRage = 0
 volcanoRageMax = 1000
 
@@ -92,9 +93,12 @@ function love.update(dt)
 	end
 	
 	forceRain = false
-	if lavaCount > ((xLoop_end * yLoop_end) - 200) then
-		forceRain = true
-		dbVal = dbVal .. " + Forced Raining "
+	if lavaCount > ((xLoop_end * yLoop_end) - (xLoop_end * yLoop_end / 3)) then
+		forceWinter = 100
+		dbVal = dbVal .. " + Forced Winter " .. forceWinter .. " "
+	elseif forceWinter > 0 then
+		forceWinter = forceWinter - 1
+		dbVal = dbVal .. " + Forced Winter " .. forceWinter .. " "
 	end
 	lavaCount = 0
 	for updateCol=xLoop_start, xLoop_end, xLoop_inc do
@@ -128,6 +132,9 @@ function love.update(dt)
 			
 			if forceRain then
 				allBlocks[updateCol][j].water = allBlocks[updateCol][j].water + 0.5
+			end
+			if forceWinter > 0 then
+				allBlocks[updateCol][j].heat = allBlocks[updateCol][j].heat - 1
 			end
 			
 			if allBlocks[updateCol][j].id == 4 then
