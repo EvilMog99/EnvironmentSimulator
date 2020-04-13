@@ -158,7 +158,7 @@ function love.update(dt)
 		updateCol = 1
 	end
 	
-	if love.math.random(1, 5000) == 2 then
+	if love.math.random(1, 1000) == 2 then
 		volcanoRage = 50
 	end
 	
@@ -177,7 +177,7 @@ function love.update(dt)
 	if lavaCount > ((xLoop_end * yLoop_end) - (xLoop_end * yLoop_end / 1.5)) then
 		forceWinter = 100
 		dbVal = dbVal .. " Forced Winter " .. forceWinter .. " "
-	elseif love.math.random(1, 5000) == 2 then
+	elseif love.math.random(1, 1000) == 2 then
 		forceWinter = 50
 		dbVal = dbVal .. " Forced Winter " .. forceWinter .. " "
 	elseif forceWinter > 0 then

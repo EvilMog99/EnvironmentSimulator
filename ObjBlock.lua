@@ -221,21 +221,21 @@ end
 function Block:interact(neighbour)
 	--share values
 	if self.id == blktype.empty then
-		neighbour.heat, self.heat = self:fastShare(neighbour.heat, self.heat)
-		neighbour.water, self.water = self:fastShare(neighbour.water, self.water)
+		neighbour.heat, self.heat = self:chooseShare(neighbour.heat, self.heat, 1)--fastShare
+		neighbour.water, self.water = self:chooseShare(neighbour.water, self.water, 1)--fastShare
 	else if self.id == blktype.sand then
-		neighbour.heat, self.heat = self:mediumShare(neighbour.heat, self.heat)
-		neighbour.water, self.water = self:mediumShare(neighbour.water, self.water)
+		neighbour.heat, self.heat = self:chooseShare(neighbour.heat, self.heat, 2)--mediumShare
+		neighbour.water, self.water = self:chooseShare(neighbour.water, self.water, 2)--mediumShare
 	else if self.id == blktype.stone then
-		neighbour.heat, self.heat = self:slowShare(neighbour.heat, self.heat)
-		neighbour.water, self.water = self:slowShare(neighbour.water, self.water)
+		neighbour.heat, self.heat = self:staggeredShare(neighbour.heat, self.heat)
+		neighbour.water, self.water = self:staggeredShare(neighbour.water, self.water)
 	else if self.id == blktype.lava then
 		if neighbour.id == blktype.lava then
-			neighbour.heat, self.heat = self:fastShare(neighbour.heat, self.heat)
-			neighbour.water, self.water = self:fastShare(neighbour.water, self.water)
+			neighbour.heat, self.heat = self:chooseShare(neighbour.heat, self.heat, 1)--fastShare
+			neighbour.water, self.water = self:chooseShare(neighbour.water, self.water, 1)--fastShare
 		else
-			neighbour.heat, self.heat = self:mediumShare(neighbour.heat, self.heat)
-			neighbour.water, self.water = self:mediumShare(neighbour.water, self.water)
+			neighbour.heat, self.heat = self:chooseShare(neighbour.heat, self.heat, 2)--mediumShare
+			neighbour.water, self.water = self:chooseShare(neighbour.water, self.water, 2)--mediumShare
 			if self.canSpread then
 				neighbour.id = 4 --lava
 			end
@@ -290,12 +290,12 @@ end
 
 function Block:evaporateWater()
 	if self.water > 5 and (self.heat > 109 or self.water > 210) then
-		self.water = self.water - 5
-		self.steam = self.steam + 5
+		self.water = self.water - 10
+		self.steam = self.steam + 10
 		self.heat = self.heat - 20
 	else if self.water > 2 and self.heat > 99 then
-		self.water = self.water - 2
-		self.steam = self.steam + 2
+		self.water = self.water - 4
+		self.steam = self.steam + 4
 		self.heat = self.heat - 8
 	else if self.water >= 1 and self.heat >= 2 then
 		self.water = self.water - 1
@@ -345,6 +345,16 @@ function Block:checkValues()
 	end
 end
 
+function Block:chooseShare(v1, v2, pref)
+	if pref == 1 and math.abs(v1 - v2) >= 20 then 
+		return self:fastShare(v1, v2)
+	elseif pref <= 2 and math.abs(v1 - v2) >= 10 then 
+		return self:mediumShare(v1, v2)
+	else --pref <= 3 and math.abs(v1 - v2) >= 2 then 
+		return self:slowShare(v1, v2)
+	end
+end
+
 function Block:fastShare(v1, v2)
 	return self:valueShare(v1, v2, 20, 10)
 end
@@ -354,7 +364,11 @@ function Block:mediumShare(v1, v2)
 end
 
 function Block:slowShare(v1, v2)
-	return self:valueShare(v1, v2, 0.2, 0.1)
+	return self:valueShare(v1, v2, 2, 1)
+end
+
+function Block:staggeredShare(v1, v2)
+	return self:valueShare(v1, v2, 10, 1)
 end
 
 function Block:valueShare(v1, v2, check, spd)
