@@ -296,7 +296,7 @@ function love.update(dt)
 	end
 	
 	for key, creature in pairs(allCreatures) do
-		creature.x = creature.x + creature.walkSpeed
+		--creature.x = creature.x + creature.walkSpeed
 	end
 	
 	if volcanoRage > 0 then
@@ -414,6 +414,9 @@ function love.draw()
 		drawCreature(creature)
 	end
 	
+	--draw info panel
+	love.graphics.setColor(0, 0, 0, 0.8)
+	love.graphics.rectangle("fill", 0, 0, 250, 70)
 	love.graphics.setColor(1, 1, 1, 1)
 	love.graphics.print("Weather: " .. dbVal, 10, 0)
 	
@@ -438,9 +441,9 @@ end
 
 function drawPopulationToScreen(noInWld, yPos, str)
 	if noInWld > 0 then
-		love.graphics.setColor(0.7, 0.7, 0.7, 1)
+		love.graphics.setColor(0.8, 0.8, 0.8, 1)
 	else
-		love.graphics.setColor(0.5, 0.5, 0.5, 0.5)
+		love.graphics.setColor(0.6, 0.6, 0.6, 0.5)
 	end
 	love.graphics.print(str .. ":", 10, yPos)
 	love.graphics.print("" .. noInWld, 70, yPos)
@@ -484,34 +487,32 @@ function drawCreature(ct)
 	else
 		love.graphics.setColor(0.5, 0.5, 0.9, 0.9)
 	end
-	love.graphics.circle("fill", getRelevantBlockX((ct.x * blkW) + wldX + (blkW / 2)), getRelevantBlockY((ct.y * blkH) + wldY + (blkH / 2)), (blkW / 2), 5)
+	love.graphics.circle("line", getRelevantBlockX((ct.x * blkW) + wldPosX + (blkW / 2)), getRelevantBlockY((ct.y * blkH) + wldPosY + (blkH / 2)), (blkW / 2), 5)
 end
 
 function drawBlock(blk, x, y)
 	if blk.id > -1 and blk.id < 5 then
 		love.graphics.setColor(getMaterialColor[blk.id]())
-		love.graphics.rectangle("fill", x + wldX, y + wldY, blkW, blkH)
+		love.graphics.rectangle("fill", x, y, blkW, blkH)
 		
 		love.graphics.setColor(blk.heat / 200, 0, blk.water / 200, 0.5)
-		love.graphics.rectangle("fill", x + wldX, y + wldY, blkW, blkH)
+		love.graphics.rectangle("fill", x, y, blkW, blkH)
 		
 		if blk.seaPlantLife > 0 then
 			love.graphics.setColor(0, 0.6, 0.6, 1)
-			love.graphics.circle("fill", x + wldX + (blkW / 2), y + wldY + (blkH / 2), blk.seaPlantLife/200 * (blkW / 2), 5)
+			love.graphics.circle("fill", x + (blkW / 2), y + (blkH / 2), blk.seaPlantLife/200 * (blkW / 2), 5)
 		end
 		if blk.landPlantLife > 0 then
 			love.graphics.setColor(0, 1, 0, 1)
-			love.graphics.circle("fill", x + wldX + (blkW / 2), y + wldY + (blkH / 2), blk.landPlantLife/200 * (blkW / 2), 5)
+			love.graphics.circle("fill", x + (blkW / 2), y + (blkH / 2), blk.landPlantLife/200 * (blkW / 2), 5)
 		end
 		if blk.seaAntLife > 0 then
 			love.graphics.setColor(0.5, 0.9, 0.6, 1)
-			drawAnts(x + wldX, y + wldY, blk.seaAntLife)
-			--love.graphics.circle("fill", x + wldX + (blkW / 2), y + wldY + (blkH / 2), blk.seaAntLife/200 * (blkW / 2), 5)
+			drawAnts(x, y, blk.seaAntLife)
 		end
 		if blk.landAntLife > 0 then
 			love.graphics.setColor(0.8, 0.4, 0, 1)
-			drawAnts(x + wldX, y + wldY, blk.landAntLife)
-			--love.graphics.circle("fill", x + wldX + (blkW / 2), y + wldY + (blkH / 2), blk.landAntLife/200 * (blkW / 2), 5)
+			drawAnts(x, y, blk.landAntLife)
 		end
 
 		--[[if blk.fishLife > 0 then
