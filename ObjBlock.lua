@@ -19,10 +19,20 @@ blktype = {
 
 blktype = protect(blktype)
 
-plantMaxHeat = 65
-plantMinHeat = 20
-plantMaxWater = 90
-plantMinWater = 10
+landPlantMaxHeat = 65
+landPlantMinHeat = 5
+landPlantMaxWater = 90
+landPlantMinWater = 5
+
+seaPlantMaxHeat = 60
+seaPlantMinHeat = 2
+seaPlantMaxWater = 190
+seaPlantMinWater = 20
+
+fishMaxHeat = 65
+fishMinHeat = 20
+fishMaxWater = 90
+fishMinWater = 10
 
 
 --class define
@@ -33,7 +43,7 @@ class "Block"-- : extends(classlib)
 	hp = 100, maxhp = 100,
 	timer = 0, maxTimer = 60,
 	canSpread = false,
-	heat = 0, water = 0, plantLife = 0, steam = 0,
+	heat = 0, water = 0, landPlantLife = 0, seaPlantLife = 0, fishLife = 0, steam = 0,
 --make sure to include all above in copy func
 
 	moveX = function(self, addx)
@@ -63,7 +73,9 @@ function Block:__init(newId)
 	self.canSpread = false
 	self.heat = 0
 	self.water = 0
-	self.plantLife = 0
+	self.landPlantLife = 0
+	self.seaPlantLife = 0
+	self.fishLife = 0
 	self.steam = 0
 	hp = 100
 	maxhp = 100
@@ -76,7 +88,9 @@ function Block:copy(target)
 	target.canSpread = self.canSpread
 	target.heat = self.heat
 	target.water = self.water
-	target.plantLife = self.plantLife
+	target.landPlantLife = self.landPlantLife
+	target.seaPlantLife = self.seaPlantLife
+	target.fishLife = self.fishLife
 	target.steam = self.steam
 	target.hp = self.hp
 	target.maxhp = self.maxhp
@@ -84,23 +98,46 @@ end
 
 function Block:defineType()
 	if self.id == blktype.lava then
-		plantLife = 0
+		--self.landPlantLife = 0
+		--self.seaPlantLife = 0
+		--self.fishLife = 0
 		if self.heat > 100 then
 			self.canSpread = true
 		end
 	end
 	
-	if self.plantLife > 0 then --if plant life exists at all
-		self.plantLife = self.plantLife + Block:calcPlantSurvival(self.heat, self.water) --calculate its survival	
-		if self.plantLife > 200 then
-			self.plantLife = 200
+	--for land plant life
+	if self.landPlantLife > 0 then --if plant life exists at all
+		self.landPlantLife = self.landPlantLife + Block:calcPlantSurvival(self.heat, self.water, landPlantMaxHeat, landPlantMinHeat, landPlantMaxWater, landPlantMinWater) --calculate its survival	
+		if self.landPlantLife > 200 then
+			self.landPlantLife = 200
+		end
+	else if self.id ~= 0 and self.id ~= 4 and self.water > landPlantMinWater and self.heat > landPlantMinHeat and love.math.random(1, 10000) == 2 then
+		self.landPlantLife = 1
+	end end
+	
+	--for sea plant life
+	if self.seaPlantLife > 0 then --if plant life exists at all
+		self.seaPlantLife = self.seaPlantLife + Block:calcPlantSurvival(self.heat, self.water, seaPlantMaxHeat, seaPlantMinHeat, seaPlantMaxWater, seaPlantMinWater) --calculate its survival	
+		if self.seaPlantLife > 200 then
+			self.seaPlantLife = 200
+		end
+	else if self.id == 0 and self.water > seaPlantMinWater and self.heat > seaPlantMinHeat and love.math.random(1, 100000) == 2 then
+		self.seaPlantLife = 1
+	end end
+	
+	--for fish life
+	--[[if self.landPlantLife > 0 then --if plant life exists at all
+		self.landPlantLife = self.landPlantLife + Block:calcPlantSurvival(self.heat, self.water) --calculate its survival	
+		if self.landPlantLife > 200 then
+			self.landPlantLife = 200
 		end
 	else if self.id ~= 0 and self.id ~= 4 and self.water > 5 and self.heat > 5 and love.math.random(1, 1000000) == 2 then
-		self.plantLife = 1
-	end end
+		self.landPlantLife = 1
+	end end]]
 end
 
-function Block:calcPlantSurvival(heat, water)
+function Block:calcPlantSurvival(heat, water, htMax, htMin, wtMax, wtMin)
 	--[[ht = (plantMaxHeat - heat) + (heat - plantMinHeat)
 	wt = (plantMaxWater - water) + (water - plantMinWater)
 	if ht > 10 then
@@ -131,13 +168,13 @@ function Block:calcPlantSurvival(heat, water)
 		wt = water - plantMinWater
 	end end]]
 	
-	if heat < plantMaxHeat and heat > plantMinHeat then
+	if heat < htMax and heat > htMin then
 		ht = 1
 	else
 		ht = -2
 	end
 	
-	if water < plantMaxWater and heat > plantMinWater then
+	if water < wtMax and heat > wtMin then
 		wt = 1
 	else
 		wt = -2
@@ -174,9 +211,15 @@ function Block:interact(neighbour)
 		end
 	end end end end
 	
-	if self.plantLife > 5 and neighbour.plantLife == 0 and neighbour.id ~= 0 and neighbour.id ~= 4 then
-		--neighbour.plantLife, self.plantLife = self:mediumShare(neighbour.plantLife, self.plantLife)
-		neighbour.plantLife = 1
+	--spread land plant life
+	if self.landPlantLife > 5 and neighbour.landPlantLife == 0 and neighbour.id ~= 0 and neighbour.id ~= 4 then
+		--neighbour.landPlantLife, self.landPlantLife = self:mediumShare(neighbour.landPlantLife, self.landPlantLife)
+		neighbour.landPlantLife = 1
+	end
+	
+	--spread sea plant life
+	if self.seaPlantLife > 5 and neighbour.seaPlantLife == 0 and neighbour.id == 0 then
+		neighbour.seaPlantLife = 1
 	end
 	
 	self:checkValues()

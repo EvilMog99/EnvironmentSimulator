@@ -224,9 +224,13 @@ function drawBlock(blk, x, y)
 		love.graphics.setColor(blk.heat / 200, 0, blk.water / 200, 0.5)
 		love.graphics.rectangle("fill", x + wldX, y + wldY, blkW, blkH)
 		
-		if blk.plantLife > 0 then
+		if blk.seaPlantLife > 0 then
+			love.graphics.setColor(0, 0.7, 0.7, 1)
+			love.graphics.circle("fill", x + wldX + (blkW / 2), y + wldY + (blkH / 2), blk.landPlantLife/200 * (blkW / 2), 5)
+		end
+		if blk.landPlantLife > 0 then
 			love.graphics.setColor(0, 1, 0, 1)
-			love.graphics.circle("fill", x + wldX + (blkW / 2), y + wldY + (blkH / 2), blk.plantLife/200 * (blkW / 2), 5)
+			love.graphics.circle("fill", x + wldX + (blkW / 2), y + wldY + (blkH / 2), blk.seaPlantLife/200 * (blkW / 2), 5)
 		end
 		
 		--love.graphics.setColor(0, 0, 0)
