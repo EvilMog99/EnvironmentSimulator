@@ -36,6 +36,7 @@ mouse_leftDown = false
 mouse_rightDown = false
 
 tempBlk = nil
+testBlk = nil
 
 function love.load()
 	face = love.graphics.newImage("face.png")
@@ -60,10 +61,10 @@ function love.load()
 	dbVal = ""
 	
 	xLoop_start = 1
-	xLoop_end = xLoop_start + wldWidth --170 -- set world width
+	xLoop_end = wldWidth--xLoop_start + wldWidth --170 -- set world width
 	xLoop_inc = 1
 	yLoop_start = 1
-	yLoop_end = yLoop_start + wldHeight --130 -- set world height
+	yLoop_end = wldHeight--yLoop_start + wldHeight --130 -- set world height
 	yLoop_inc = 1
 	for i=xLoop_start, xLoop_end, xLoop_inc do
 		allBlocks[i] = {}
@@ -73,6 +74,7 @@ function love.load()
 		end
 	end
 	
+	testBlk = Block:new(4)
 	--buildSea(6, 15, 10, 10)
 	--buildSea(22, 15, 15, 12)
 	--buildSea(20, 8, 5, 5)
@@ -188,7 +190,7 @@ function love.update(dt)
 	--process mouse events
 	if mouse_leftDown then
 		--place block
-		tempBlk, success = getBlock(math.floor((love.mouse.getX() - wldPosX) / blkW), math.floor((love.mouse.getY() - wldPosY) / blkH))
+		tempBlk, success = getBlock(math.floor(getRelevantX(((love.mouse.getX() - wldPosX) / blkW))), math.floor(getRelevantY((love.mouse.getY() - wldPosY) / blkH)))
 		tempBlk.id = 2
 		tempBlk.water = 0
 		tempBlk.heat = 50
@@ -298,14 +300,14 @@ function getRelevantY(y)
 end
 
 function getBlock(x, y)
-	if testBlockExists(x, y) then
-		dbVal = dbVal .. " x: " .. x .. " y: " .. y
-		return allBlocks[x][y], true
-	end
-	return nil, false
+	--if testBlockExists(x, y) then
+	dbVal = dbVal .. " x: " .. x .. " y: " .. y
+	return allBlocks[x][y], true
+	--end
+	--return nil, false
 end
 
-function testBlockExists(tx, ty)
+--[[function testBlockExists(tx, ty)
 	if (tx > 0) and (tx <= xLoop_end)
 		and (ty > 0) and (ty <= yLoop_end) then
 		--dbVal = dbVal .. " Bl: x " .. tx .. " y: " .. ty
@@ -313,7 +315,7 @@ function testBlockExists(tx, ty)
 	end
 	
 	return false
-end
+end]]
 
 function buildVolcano(startX, startY, width, height)
 	--build volcano
@@ -372,7 +374,6 @@ function love.draw()
 			end]]
 		end
 	end
-	dbVal = dbVal .. " tempLocX: " .. tempLocX
 	
 	drawCharacter(Player)
 	
