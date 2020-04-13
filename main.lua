@@ -264,7 +264,7 @@ function love.update(dt)
 			accessWldBlock(updateCol, j):interact(accessWldBlock(updateCol, j - 1))
 			
 			--Create Invertebrate
-			if accessWldBlock(updateCol, j).evolveCreatureId == 1 then
+			if accessWldBlock(updateCol, j).evolveCreatureId == 1 and creatureInvert[readIndexNoIndexWld] < 1 then
 				table.insert(allCreatures, Creature:new(1, updateCol + (blkW / 20), j + (blkH / 20)
 					, -4, 0			-- Food
 					, 1, 0			-- Attack
@@ -515,6 +515,19 @@ function love.draw()
 		drawCreature(creature)
 	end
 	
+	--draw stats for debugging creature
+	love.graphics.setColor(0, 0, 0, 0.8)
+	love.graphics.rectangle("fill", 500, 0, 500, 100)
+	if #allCreatures > 0 then
+		local ct = allCreatures[1]
+		love.graphics.setColor(1, 1, 1, 1)
+		love.graphics.print("Pos  x: " .. ct.x .. " y: " .. ct.y, 510, 5)
+		love.graphics.print("Targ x: " .. ct.targetX .. " y: " .. ct.targetY, 510, 20)
+		love.graphics.print("HP    : " .. ct.hp, 510, 35)
+		love.graphics.print("Cur Fd: " .. ct.foodCurrent, 510, 50)
+	end
+	
+	
 	--draw info panel
 	love.graphics.setColor(0, 0, 0, 0.8)
 	love.graphics.rectangle("fill", 0, 0, 400, 70)
@@ -622,7 +635,7 @@ function drawCreature(ct)
 	else
 		love.graphics.setColor(0.5, 0.5, 0.5, 0.5)
 	end
-	love.graphics.circle("fill", getRelevantBlockX((ct.x * blkW) + wldPosX + (ct.currentSize / 2)), getRelevantBlockY((ct.y * blkH) + wldPosY + (ct.currentSize / 2)), ct.currentSize, 6)
+	love.graphics.circle("fill", getRelevantBlockX((ct.x * blkW) + wldPosX + (ct.currentSize / 2)), getRelevantBlockY((ct.y * blkH) + wldPosY + (ct.currentSize / 2)), 8, 6)--ct.currentSize, 6)
 end
 
 function drawBlock(blk, x, y)
