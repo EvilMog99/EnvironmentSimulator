@@ -41,8 +41,10 @@ function love.load()
 	face = love.graphics.newImage("face.png")
 	wldPosX = 0
 	wldPosY = 0
-	wldX, wldY = -20, -20
+	wldX, wldY = 0, 0
 	blkW, blkH = 10, 10
+	wldWidth = 200
+	wldHeight = 200
 	moveUp, moveDown, moveLeft, moveRight = false, false, false, false
 	updateCol = 1 --for setting which column will be updated next
 	--windowWidth, windowHeight = love.window.getDimensions()
@@ -58,10 +60,10 @@ function love.load()
 	dbVal = ""
 	
 	xLoop_start = 1
-	xLoop_end = 200 --170 -- set world width
+	xLoop_end = xLoop_start + wldWidth --170 -- set world width
 	xLoop_inc = 1
 	yLoop_start = 1
-	yLoop_end = 200 --130 -- set world height
+	yLoop_end = yLoop_start + wldHeight --130 -- set world height
 	yLoop_inc = 1
 	for i=xLoop_start, xLoop_end, xLoop_inc do
 		allBlocks[i] = {}
@@ -114,6 +116,10 @@ function love.mousereleased(x, y, button, istouch)
 	end
 end
 
+function asWholeNumber(v)
+	return v - (v % 1)
+end
+
 function love.update(dt)
 	dbVal = ""
 	--update life counting index
@@ -152,7 +158,7 @@ function love.update(dt)
 		updateCol = 1
 	end
 	
-	if love.math.random(1, 5000) == 1 then
+	if love.math.random(1, 5000) == 2 then
 		volcanoRage = 50
 	end
 	
@@ -171,7 +177,7 @@ function love.update(dt)
 	if lavaCount > ((xLoop_end * yLoop_end) - (xLoop_end * yLoop_end / 1.5)) then
 		forceWinter = 100
 		dbVal = dbVal .. " Forced Winter " .. forceWinter .. " "
-	elseif love.math.random(1, 5000) == 1 then
+	elseif love.math.random(1, 5000) == 2 then
 		forceWinter = 50
 		dbVal = dbVal .. " Forced Winter " .. forceWinter .. " "
 	elseif forceWinter > 0 then
@@ -182,8 +188,10 @@ function love.update(dt)
 	--process mouse events
 	if mouse_leftDown then
 		--place block
-		tempBlk, success = getBlock((love.mouse.getX() + wldPosX) / blkW, (love.mouse.getY() + wldPosY) / blkH)
-		
+		tempBlk, success = getBlock(math.floor((love.mouse.getX() - wldPosX) / blkW), math.floor((love.mouse.getY() - wldPosY) / blkH))
+		tempBlk.id = 2
+		tempBlk.water = 0
+		tempBlk.heat = 50
 	end
 	if mouse_rightDown then
 		
@@ -280,7 +288,7 @@ end
 function getBlock(x, y)
 	if testBlockExists(x, y) then
 		dbVal = dbVal .. " x: " .. x .. " y: " .. y
-		--return allBlocks[x][y], true
+		return allBlocks[x][y], true
 	end
 	return nil, false
 end

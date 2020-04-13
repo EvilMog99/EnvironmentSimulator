@@ -289,15 +289,15 @@ function Block:interact(neighbour)
 end
 
 function Block:evaporateWater()
-	if self.water > 10 and (self.heat > 109 or self.water > 210) then
-		self.water = self.water - 10
-		self.steam = self.steam + 10
+	if self.water > 5 and (self.heat > 109 or self.water > 210) then
+		self.water = self.water - 5
+		self.steam = self.steam + 5
 		self.heat = self.heat - 20
-	else if self.water > 0 and self.heat > 99 then
+	else if self.water > 2 and self.heat > 99 then
 		self.water = self.water - 2
 		self.steam = self.steam + 2
-		self.heat = self.heat - 4
-	else if self.water > 0 and self.heat > 1 then
+		self.heat = self.heat - 8
+	else if self.water >= 1 and self.heat >= 2 then
 		self.water = self.water - 1
 		self.steam = self.steam + 1
 		self.heat = self.heat - 2
@@ -322,7 +322,7 @@ function Block:checkValues()
 			self.id = 0 --empty
 			self.hp = self.maxhp
 		else if self.water > 80 then
-			self.hp = self.hp - (self.water / 30)
+			self.hp = self.hp - (self.water / 80)
 		end end
 		
 	else if self.id == blktype.stone then
@@ -330,7 +330,7 @@ function Block:checkValues()
 			self.id = 3 --sand
 			self.hp = self.maxhp
 		else if self.water > 40 then
-			self.hp = self.hp - (self.water / 30)
+			self.hp = self.hp - (self.water / 40)
 		
 		if self.heat > 80 then
 			self.id = 4 --lava
@@ -354,7 +354,7 @@ function Block:mediumShare(v1, v2)
 end
 
 function Block:slowShare(v1, v2)
-	return self:valueShare(v1, v2, 2, 1)
+	return self:valueShare(v1, v2, 0.2, 0.1)
 end
 
 function Block:valueShare(v1, v2, check, spd)
