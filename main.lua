@@ -23,12 +23,23 @@ seaAntNoInWld = {0, 0}
 landPlantNoInWld = {0, 0}
 seaPlantNoInWld = {0, 0}
 
-seaCreatureType01NoInWld = {0, 0}
+creatureInvert = {0, 0}
+creatureFish = {0, 0}
+creatureAmfib = {0, 0}
+creatureRept = {0, 0}
+creatureBird = {0, 0}
+creatureMam = {0, 0}
 
 unlockedSeaAnt = false
 unlockedSeaPlant = false
 unlockedLandPlant = false
 unlockedLandAnt = false
+unlockedInvertebrate = false
+unlockedFish = false
+unlockedAmfibian = false
+unlockedReptile = false
+unlockedBird = false
+unlockedMammal = false
 
 romingSpeed = 200
 
@@ -59,6 +70,12 @@ function love.load()
 	seaAntNoInWld = {0, 0}
 	landPlantNoInWld = {0, 0}
 	seaPlantNoInWld = {0, 0}
+	creatureInvert = {0, 0}
+	creatureFish = {0, 0}
+	creatureAmfib = {0, 0}
+	creatureRept = {0, 0}
+	creatureBird = {0, 0}
+	creatureMam = {0, 0}
 	
 	dbVal = ""
 	
@@ -97,7 +114,7 @@ function love.load()
 	
 	Player:resetId(1)
 	
-	local tempCreature = Creature:new(1)
+	--[[local tempCreature = Creature:new(1)
 	tempCreature.x = 10
 	table.insert(allCreatures, tempCreature)
 	
@@ -107,7 +124,7 @@ function love.load()
 	
 	tempCreature = Creature:new(3)
 	tempCreature.x = 30
-	table.insert(allCreatures, tempCreature)
+	table.insert(allCreatures, tempCreature)]]
 	
 	love.window.setFullscreen(true)
 	--windowSizeX, windowSizeY = love.window.getDimensions()
@@ -150,6 +167,12 @@ function love.update(dt)
 	seaAntNoInWld[updateIndexNoIndexWld] = 0
 	landPlantNoInWld[updateIndexNoIndexWld] = 0
 	seaPlantNoInWld[updateIndexNoIndexWld] = 0
+	creatureInvert[updateIndexNoIndexWld] = 0
+	creatureFish[updateIndexNoIndexWld] = 0
+	creatureAmfib[updateIndexNoIndexWld] = 0
+	creatureRept[updateIndexNoIndexWld] = 0
+	creatureBird[updateIndexNoIndexWld] = 0
+	creatureMam[updateIndexNoIndexWld] = 0
 	
 	--update movement
 	if moveUp then
@@ -234,18 +257,19 @@ function love.update(dt)
 			end
 			
 			--run block interaction
-			--if testBlockExists(updateCol + 1, j) then
-				accessWldBlock(updateCol, j):interact(accessWldBlock(updateCol + 1, j))
-			--end
-			--if testBlockExists(updateCol - 1, j) then
-				accessWldBlock(updateCol, j):interact(accessWldBlock(updateCol - 1, j))
-			--end
-			--if testBlockExists(updateCol, j + 1) then
-				accessWldBlock(updateCol, j):interact(accessWldBlock(updateCol, j + 1))
-			--end
-			--if testBlockExists(updateCol, j -  1) then
-				accessWldBlock(updateCol, j):interact(accessWldBlock(updateCol, j - 1))
-			--end
+			accessWldBlock(updateCol, j):interact(accessWldBlock(updateCol + 1, j))
+			accessWldBlock(updateCol, j):interact(accessWldBlock(updateCol - 1, j))
+			accessWldBlock(updateCol, j):interact(accessWldBlock(updateCol, j + 1))
+			accessWldBlock(updateCol, j):interact(accessWldBlock(updateCol, j - 1))
+			
+			--Create Invertebrate
+			if accessWldBlock(updateCol, j).evolveCreatureId == 1 then
+				table.insert(allCreatures, Creature:new(1, updateCol + (blkW / 20), j + (blkH / 20)
+					, -4, 0			-- Food
+					, 1, 0			-- Attack
+					, 1, blkW / 2	-- Size
+					))
+			end
 			
 			accessWldBlock(updateCol, j):resetAfterUpdate()
 			
@@ -297,6 +321,28 @@ function love.update(dt)
 	
 	for key, creature in pairs(allCreatures) do
 		--creature.x = creature.x + creature.walkSpeed
+		
+		
+		--count creature as type
+		if creature.animalId == 1 then
+			unlockedInvertebrate = true
+			creatureInvert[updateIndexNoIndexWld] = creatureInvert[updateIndexNoIndexWld] + 1
+		elseif creature.animalId == 2 then
+			unlockedFish = true
+			creatureFish[updateIndexNoIndexWld] = creatureFish[updateIndexNoIndexWld] + 1
+		elseif creature.animalId == 3 then
+			unlockedAmfibian = true
+			creatureAmfib[updateIndexNoIndexWld] = creatureAmfib[updateIndexNoIndexWld] + 1
+		elseif creature.animalId == 4 then
+			unlockedReptile = true
+			creatureRept[updateIndexNoIndexWld] = creatureRept[updateIndexNoIndexWld] + 1
+		elseif creature.animalId == 5 then
+			unlockedBird = true
+			creatureBird[updateIndexNoIndexWld] = creatureBird[updateIndexNoIndexWld] + 1
+		elseif creature.animalId == 6 then
+			unlockedMammal = true
+			creatureMam[updateIndexNoIndexWld] = creatureMam[updateIndexNoIndexWld] + 1
+		end
 	end
 	
 	if volcanoRage > 0 then
@@ -408,7 +454,7 @@ function love.draw()
 		end
 	end
 	
-	drawCharacter(Player)
+	--drawCharacter(Player)
 	
 	for key, creature in pairs(allCreatures) do
 		drawCreature(creature)
@@ -416,37 +462,63 @@ function love.draw()
 	
 	--draw info panel
 	love.graphics.setColor(0, 0, 0, 0.8)
-	love.graphics.rectangle("fill", 0, 0, 250, 70)
+	love.graphics.rectangle("fill", 0, 0, 400, 70)
 	love.graphics.setColor(1, 1, 1, 1)
 	love.graphics.print("Weather: " .. dbVal, 10, 0)
 	
 	local yPos = 11
 	if unlockedSeaAnt then
-		drawPopulationToScreen(seaAntNoInWld[readIndexNoIndexWld], yPos, "Plankton")
+		drawPopulationToScreen(seaAntNoInWld[readIndexNoIndexWld], 70, yPos, "Plankton")
 		yPos = yPos + 11
 	end
 	if unlockedSeaPlant then
-		drawPopulationToScreen(seaPlantNoInWld[readIndexNoIndexWld], yPos, "Coral")
+		drawPopulationToScreen(seaPlantNoInWld[readIndexNoIndexWld], 70, yPos, "Coral")
 		yPos = yPos + 11
 	end
 	if unlockedLandPlant then
-		drawPopulationToScreen(landPlantNoInWld[readIndexNoIndexWld], yPos, "Plants")
+		drawPopulationToScreen(landPlantNoInWld[readIndexNoIndexWld], 70, yPos, "Plants")
 		yPos = yPos + 11
 	end
 	if unlockedLandAnt then
-		drawPopulationToScreen(landAntNoInWld[readIndexNoIndexWld], yPos, "Ants")
+		drawPopulationToScreen(landAntNoInWld[readIndexNoIndexWld], 70, yPos, "Ants")
+		yPos = yPos + 11
+	end
+	
+	yPos = 0
+	if unlockedInvertebrate then
+		drawPopulationToScreen(creatureInvert[readIndexNoIndexWld], 300, yPos, "Invertebrates")
+		yPos = yPos + 11
+	end
+	if unlockedFish then
+		drawPopulationToScreen(creatureFish[readIndexNoIndexWld], 300, yPos, "Fish")
+		yPos = yPos + 11
+	end
+	if unlockedAmfibian then
+		drawPopulationToScreen(creatureAmfib[readIndexNoIndexWld], 300, yPos, "Amfibians")
+		yPos = yPos + 11
+	end
+	if unlockedReptile then
+		drawPopulationToScreen(creatureRept[readIndexNoIndexWld], 300, yPos, "Reptiles")
+		yPos = yPos + 11
+	end
+	if unlockedBird then
+		drawPopulationToScreen(creatureBird[readIndexNoIndexWld], 300, yPos, "Birds")
+		yPos = yPos + 11
+	end
+	if unlockedMammal then
+		drawPopulationToScreen(creatureMam[readIndexNoIndexWld], 300, yPos, "Mammals")
 		yPos = yPos + 11
 	end
 end
 
-function drawPopulationToScreen(noInWld, yPos, str)
+function drawPopulationToScreen(noInWld, xPos, yPos, str)
 	if noInWld > 0 then
 		love.graphics.setColor(0.8, 0.8, 0.8, 1)
 	else
 		love.graphics.setColor(0.6, 0.6, 0.6, 0.5)
 	end
-	love.graphics.print(str .. ":", 10, yPos)
-	love.graphics.print("" .. noInWld, 70, yPos)
+	love.graphics.print(str .. ":", xPos - 60, yPos)
+	love.graphics.print("" .. noInWld, xPos, yPos)
 end
 
 local getMaterialColor = {
@@ -480,14 +552,22 @@ function drawCharacter(chr)
 end
 
 function drawCreature(ct)
-	if ct.id == 1 then
-		love.graphics.setColor(0.9, 0.5, 0.5, 0.9)
-	elseif ct.id == 2 then
-		love.graphics.setColor(0.5, 0.9, 0.5, 0.9)
+	if ct.id == 1 then 		--Invertebrate
+		love.graphics.setColor(0.8, 0.8, 1.0, 1)
+	elseif ct.id == 2 then	--Fish
+		love.graphics.setColor(0.8, 0.5, 0.0, 1)
+	elseif ct.id == 2 then	--Amfibian
+		love.graphics.setColor(0.7, 0.7, 0.0, 1)
+	elseif ct.id == 2 then	--Reptile
+		love.graphics.setColor(0.5, 1.0, 0.5, 1)
+	elseif ct.id == 2 then	--Bird
+		love.graphics.setColor(0.8, 0.8, 0.8, 1)
+	elseif ct.id == 2 then	--Mammal
+		love.graphics.setColor(0.4, 0.4, 0.0, 1)
 	else
-		love.graphics.setColor(0.5, 0.5, 0.9, 0.9)
+		love.graphics.setColor(0.5, 0.5, 0.5, 0.5)
 	end
-	love.graphics.circle("line", getRelevantBlockX((ct.x * blkW) + wldPosX + (blkW / 2)), getRelevantBlockY((ct.y * blkH) + wldPosY + (blkH / 2)), (blkW / 2), 5)
+	love.graphics.circle("fill", getRelevantBlockX((ct.x * blkW) + wldPosX + (ct.currentSize / 2)), getRelevantBlockY((ct.y * blkH) + wldPosY + (ct.currentSize / 2)), ct.currentSize, 6)
 end
 
 function drawBlock(blk, x, y)
