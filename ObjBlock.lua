@@ -29,13 +29,13 @@ landPlantMinHeat = 10
 landPlantMaxWater = 90
 landPlantMinWater = 5
 
-seaAntMaxHeat = 60
-seaAntMinHeat = -1
+seaAntMaxHeat = 50
+seaAntMinHeat = 20
 seaAntMaxWater = 450
-seaAntMinWater = 10
+seaAntMinWater = 2
 
-seaPlantMaxHeat = 60
-seaPlantMinHeat = -1
+seaPlantMaxHeat = 70
+seaPlantMinHeat = 5
 seaPlantMaxWater = 450
 seaPlantMinWater = 10
 
@@ -141,6 +141,10 @@ function Block:defineType(landAntNoInWld, seaAntNoInWld, landPlantNoInWld, seaPl
 			self.seaAntLife = self.seaAntLife - 3
 		end
 		
+		if self.seaPlantLife > 0 then
+			self.seaAntLife = self.seaAntLife + 1.5
+		end
+		
 		if self.seaAntLife > 200 then
 			self.seaAntLife = 200
 		end
@@ -167,6 +171,10 @@ function Block:defineType(landAntNoInWld, seaAntNoInWld, landPlantNoInWld, seaPl
 		self.seaPlantLife = self.seaPlantLife + (Block:calcPlantSurvival(self.heat, self.water, seaPlantMaxHeat, seaPlantMinHeat, seaPlantMaxWater, seaPlantMinWater) * 1) --calculate its survival	
 		if self.id ~= 0 then
 			self.seaPlantLife = self.seaPlantLife - 3
+		end
+		
+		if self.seaAntLife > 0 then
+			self.seaPlantLife = self.seaPlantLife + 1.5
 		end
 		
 		if self.seaPlantLife > 200 then
@@ -243,9 +251,9 @@ function Block:interact(neighbour)
 		if neighbour.id == 0 then
 			neighbour.seaAntLife = 1
 		end
-	elseif love.math.random(1, 10000) == 2 and self.seaAntLife > 5 and neighbour.seaAntLife > 0 and neighbour.seaPlantLife == 0 and neighbour.water > seaPlantMinWater and neighbour.heat > seaPlantMinHeat and neighbour.id == 0 then --try to evolve
+	elseif love.math.random(1, 100000) == 2 and self.seaAntLife > 5 and neighbour.seaAntLife > 0 and neighbour.seaPlantLife == 0 and neighbour.water > seaPlantMinWater and neighbour.heat > seaPlantMinHeat and neighbour.id == 0 then --try to evolve
 		neighbour.seaPlantLife = 1 -- create sea plant
-	elseif love.math.random(1, 10000) == 2 and self.landAntLife > 5 and neighbour.landPlantLife > 5  and neighbour.landAntLife == 0 and neighbour.water > landAntMinWater and neighbour.heat > landAntMinHeat and neighbour.id ~= 0 and neighbour.id ~= 4 then --try to evolve
+	elseif love.math.random(1, 1000) == 2 and self.seaAntLife > 5 and neighbour.landPlantLife > 5  and neighbour.landAntLife == 0 and neighbour.water > landAntMinWater and neighbour.heat > landAntMinHeat and neighbour.id ~= 0 and neighbour.id ~= 4 then --try to evolve
 		neighbour.landAntLife = 1 -- evolve land ant
 	end
 
@@ -273,7 +281,7 @@ function Block:interact(neighbour)
 			neighbour.seaPlantLife = neighbour.seaPlantLife + 40
 			self.seaPlantLife = self.seaPlantLife - 40
 		end
-	elseif love.math.random(1, 10000) == 2 and self.seaPlantLife > 5 and neighbour.landPlantLife == 0 and neighbour.water > landPlantMinWater and neighbour.heat > landPlantMinHeat and neighbour.id ~= 0 and neighbour.id ~= 4 then --try to evolve to go on land
+	elseif love.math.random(1, 100000) == 2 and self.seaPlantLife > 5 and neighbour.landPlantLife == 0 and neighbour.water > landPlantMinWater and neighbour.heat > landPlantMinHeat and neighbour.id ~= 0 and neighbour.id ~= 4 then --try to evolve to go on land
 		neighbour.landPlantLife = 1 -- evolve land plant
 	end
 	

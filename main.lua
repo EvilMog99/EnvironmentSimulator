@@ -21,6 +21,11 @@ seaAntNoInWld = {0, 0}
 landPlantNoInWld = {0, 0}
 seaPlantNoInWld = {0, 0}
 
+unlockedSeaAnt = true
+unlockedSeaPlant = true
+unlockedLandPlant = true
+unlockedLandAnt = true
+
 function love.load()
 	face = love.graphics.newImage("face.png")
 	wldX, wldY = -20, -20
@@ -264,14 +269,45 @@ function love.draw()
 	
 	love.graphics.setColor(1, 1, 1, 1)
 	love.graphics.print("Weather: " .. dbVal, 100, 0)
-	love.graphics.print("Plankton:", 100, 11)
-	love.graphics.print("" .. seaAntNoInWld[readIndexNoIndexWld], 160, 11)
-	love.graphics.print("Ants:", 100, 22)
-	love.graphics.print("" .. landAntNoInWld[readIndexNoIndexWld], 160, 22)
-	love.graphics.print("Coral:", 100, 33)
-	love.graphics.print("" .. seaPlantNoInWld[readIndexNoIndexWld], 160, 33)
-	love.graphics.print("Plants:", 100, 44)
-	love.graphics.print("" .. landPlantNoInWld[readIndexNoIndexWld], 160, 44)
+	if unlockedSeaAnt then
+		if seaAntNoInWld[readIndexNoIndexWld] > 0 then
+			love.graphics.setColor(1, 1, 1, 1)
+		else
+			love.graphics.setColor(0.6, 0.6, 0.6, 0.6)
+		end
+		love.graphics.print("Plankton:", 100, 11)
+		love.graphics.print("" .. seaAntNoInWld[readIndexNoIndexWld], 160, 11)
+	end
+	
+	if unlockedLandAnt then
+		if landAntNoInWld[readIndexNoIndexWld] > 0 then
+			love.graphics.setColor(1, 1, 1, 1)
+		else
+			love.graphics.setColor(0.6, 0.6, 0.6, 0.6)
+		end
+		love.graphics.print("Ants:", 100, 22)
+		love.graphics.print("" .. landAntNoInWld[readIndexNoIndexWld], 160, 22)
+	end
+	
+	if unlockedSeaPlant then
+		if seaPlantNoInWld[readIndexNoIndexWld] > 0 then
+			love.graphics.setColor(1, 1, 1, 1)
+		else
+			love.graphics.setColor(0.6, 0.6, 0.6, 0.6)
+		end
+		love.graphics.print("Coral:", 100, 33)
+		love.graphics.print("" .. seaPlantNoInWld[readIndexNoIndexWld], 160, 33)
+	end
+	
+	if unlockedLandPlant then
+		if landPlantNoInWld[readIndexNoIndexWld] > 0 then
+			love.graphics.setColor(1, 1, 1, 1)
+		else
+			love.graphics.setColor(0.6, 0.6, 0.6, 0.6)
+		end
+		love.graphics.print("Plants:", 100, 44)
+		love.graphics.print("" .. landPlantNoInWld[readIndexNoIndexWld], 160, 44)
+	end
 end
 
 local getMaterialColor = {
@@ -312,24 +348,25 @@ function drawBlock(blk, x, y)
 		love.graphics.setColor(blk.heat / 200, 0, blk.water / 200, 0.5)
 		love.graphics.rectangle("fill", x + wldX, y + wldY, blkW, blkH)
 		
-		if blk.seaAntLife > 0 then
-			love.graphics.setColor(0, 0.6, 0.4, 1)
-			drawAnts(x + wldX, y + wldY, blk.seaAntLife)
-			--love.graphics.circle("fill", x + wldX + (blkW / 2), y + wldY + (blkH / 2), blk.seaAntLife/200 * (blkW / 2), 5)
-		end
-		if blk.landAntLife > 0 then
-			love.graphics.setColor(0.5, 1, 0, 1)
-			drawAnts(x + wldX, y + wldY, blk.landAntLife)
-			--love.graphics.circle("fill", x + wldX + (blkW / 2), y + wldY + (blkH / 2), blk.landAntLife/200 * (blkW / 2), 5)
-		end
 		if blk.seaPlantLife > 0 then
-			love.graphics.setColor(0, 0.7, 0.7, 1)
+			love.graphics.setColor(0, 0.6, 0.6, 1)
 			love.graphics.circle("fill", x + wldX + (blkW / 2), y + wldY + (blkH / 2), blk.seaPlantLife/200 * (blkW / 2), 5)
 		end
 		if blk.landPlantLife > 0 then
 			love.graphics.setColor(0, 1, 0, 1)
 			love.graphics.circle("fill", x + wldX + (blkW / 2), y + wldY + (blkH / 2), blk.landPlantLife/200 * (blkW / 2), 5)
 		end
+		if blk.seaAntLife > 0 then
+			love.graphics.setColor(0.5, 0.9, 0.6, 1)
+			drawAnts(x + wldX, y + wldY, blk.seaAntLife)
+			--love.graphics.circle("fill", x + wldX + (blkW / 2), y + wldY + (blkH / 2), blk.seaAntLife/200 * (blkW / 2), 5)
+		end
+		if blk.landAntLife > 0 then
+			love.graphics.setColor(0.4, 0.4, 0, 1)
+			drawAnts(x + wldX, y + wldY, blk.landAntLife)
+			--love.graphics.circle("fill", x + wldX + (blkW / 2), y + wldY + (blkH / 2), blk.landAntLife/200 * (blkW / 2), 5)
+		end
+
 		if blk.fishLife > 0 then
 			love.graphics.setColor(0.8, 0, 0.8, 1)
 			love.graphics.circle("fill", x + wldX + (blkW / 2), y + wldY + (blkH / 2), blk.fishLife/200 * (blkW / 2), 5)
