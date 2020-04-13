@@ -25,9 +25,17 @@ function love.load()
 	for i=xLoop_start, xLoop_end, xLoop_inc do
 		allBlocks[i] = {}
 		for j=yLoop_start, yLoop_end, yLoop_inc do
-			allBlocks[i][j] = Block:new(-1)
+			allBlocks[i][j] = Block:new(2)
+			allBlocks[i][j].heat = 10
 		end
 	end
+	
+	buildSea(6, 15, 10, 10)
+	buildSea(22, 15, 15, 12)
+	buildSea(20, 8, 5, 5)
+	
+	buildVolcano(10, 5, 3, 3)
+	buildVolcano(35, 20, 4, 7)
 	
 	Player:resetId(1)
 end
@@ -54,6 +62,8 @@ function love.update(dt)
 	end
 	
 	for j=yLoop_start, yLoop_end, yLoop_inc do
+		allBlocks[updateCol][j]:defineType()
+		
 		if testBlockExists(updateCol + 1, j) then
 			allBlocks[updateCol][j]:interact(allBlocks[updateCol + 1][j])
 		end
@@ -66,7 +76,14 @@ function love.update(dt)
 		if testBlockExists(updateCol, j -  1) then
 			allBlocks[updateCol][j]:interact(allBlocks[updateCol][j - 1])
 		end
+		
+		allBlocks[updateCol][j]:resetAfterUpdate()
+		
+		if love.math.random(1, 10000) == 2 then
+			buildVolcano(updateCol, j, love.math.random(1, 8), love.math.random(1, 8))
+		end
 	end
+	
 end
 
 function testBlockExists(tx, ty)
@@ -77,6 +94,30 @@ function testBlockExists(tx, ty)
 	end
 	
 	return false
+end
+
+function buildVolcano(startX, startY, width, height)
+	--build volcano
+	for i=startX, startX+width, 1 do
+		for j=startY, startY+height, 1 do
+			if testBlockExists(i, j) then
+				allBlocks[i][j].id = blktype.lava
+				allBlocks[i][j].heat = 200
+			end
+		end
+	end
+end
+
+function buildSea(startX, startY, width, height)
+	--build sea
+	for i=startX, startX+width, 1 do
+		for j=startY, startY+height, 1 do
+			if testBlockExists(i, j) then
+				allBlocks[i][j].id = blktype.empty
+				allBlocks[i][j].water = 200
+			end
+		end
+	end
 end
 
 
@@ -98,6 +139,27 @@ function love.draw()
 	love.graphics.print("Debug: " .. dbVal, 100, 0)
 end
 
+local getMaterialColor = {
+		[-1] = function()
+			return 0, 0, 0
+		end,
+		[0] = function()
+			return 0, 0, 0
+		end,
+		[1] = function() --empty
+			return 0.1, 0.1, 0.1
+		end,
+		[2] = function() --stone
+			return 0.5, 0.5, 0.5
+		end,
+		[3] = function() --sand
+			return 1, 1, 0
+		end,
+		[4] = function() --lava
+			return 1, 0.2, 0.2
+	end
+}
+
 function drawCharacter(chr)
 	if chr.id == 1 then
 		love.graphics.setColor(0, 0.6, 0.8, 0.9)
@@ -108,15 +170,22 @@ function drawCharacter(chr)
 end
 
 function drawBlock(blk, x, y)
-	if blk.id == 1 then
-		love.graphics.setColor(0, 0.6, 0.1)
-	else
-		love.graphics.setColor(0.6, 0.1, 0)
+	if blk.id > -1 and blk.id < 5 then
+		love.graphics.setColor(getMaterialColor[blk.id]())
+		love.graphics.rectangle("fill", x + wldX, y + wldY, blkW, blkH)
+		
+		love.graphics.setColor(blk.heat / 200, 0, blk.water / 200, 0.5)
+		love.graphics.rectangle("fill", x + wldX, y + wldY, blkW, blkH)
+		
+		if blk.plantLife > 0 then
+			love.graphics.setColor(0, 1, 0, 1)
+			love.graphics.circle("fill", x + wldX + (blkW / 2), y + wldY + (blkH / 2), blk.plantLife/200 * blkW, 5)
+		end
+		
+		love.graphics.setColor(0, 0, 0)
+		love.graphics.rectangle("line", x + wldX, y + wldY, blkW, blkH)
 	end
-	love.graphics.rectangle("fill", x + wldX, y + wldY, blkW, blkH)
-	
-	love.graphics.setColor(0, 0, 0)
-	love.graphics.rectangle("line", x + wldX, y + wldY, blkW, blkH)
+
 end
 
 function updateWldPosition()
