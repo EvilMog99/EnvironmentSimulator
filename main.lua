@@ -28,29 +28,29 @@ function love.load()
 			allBlocks[i][j] = Block:new(-1)
 		end
 	end
+	
+	Player:resetId(1)
 end
 
 
 function love.update(dt)
 	--dbVal = ""
 	if moveUp then
-		Player:moveY(-1)
+		Player:moveY(-1 * (dt + 1))
 	else if moveDown then
-		Player:moveY(1)
+		Player:moveY(1 * (dt + 1))
 	end end
 	
 	if moveLeft then
-		Player:moveX(-1)
+		Player:moveX(-1 * (dt + 1))
 	else if moveRight then
-		Player:moveX(1)
+		Player:moveX(1 * (dt + 1))
 	end end
-	
-	Player:resetId(1)
 	
 	--update all blocks
 	updateCol = updateCol + 1
 	if updateCol > xLoop_end then
-		updateCol = 0
+		updateCol = 1
 	end
 	
 	for j=yLoop_start, yLoop_end, yLoop_inc do
@@ -100,9 +100,9 @@ end
 
 function drawCharacter(chr)
 	if chr.id == 1 then
-		love.graphics.setColor(0, 0.6, 0.1)
+		love.graphics.setColor(0, 0.6, 0.8, 0.9)
 	else
-		love.graphics.setColor(0.6, 0.1, 0)
+		love.graphics.setColor(1, 0.2, 0.8, 0.9)
 	end
 	love.graphics.rectangle("fill", chr.x, chr.y, blkW, blkH)
 end
