@@ -322,75 +322,112 @@ function love.update(dt)
 		end
 	end
 	
+	--delete creatures that aren't in use
 	for key, creature in pairs(allCreatures) do
+		if creature == nil or creature.hp <= 0 then
+			table.remove(allCreatures, key)
+			break;
+		end
+	end
 	
-		--process food and health
-		creature.foodCurrent = creature.foodCurrent - 0.01
-		if creature.foodCurrent < 0 then
-			creature.foodCurrent = 0
-		end
-		if creature.foodCurrent < creature.foodMin then
-			creature.hp = creature.hp - 0.1
-		end
-		
-		if creature.checkTimer <= 0 then
-			creature.checkTimer = creature.checkTimerMax
-			--choose to move !!make circular!!
-			tempFoodVal = 0
-			creature.targetX = 0
-			creature.targetY = 0
-			for i=-creature.visionDis, creature.visionDis, 1 do
-				for j=-creature.visionDis, creature.visionDis, 1 do
-					tempBlk = accessWldBlock(math.floor(creature.x + i), math.floor(creature.y + j))
-					--calculate how much food value this block has to this creature
-					if (creature.foodA == -4 or creature.foodB == -4) and tempBlk.seaAntLife > tempFoodVal then
-						tempFoodVal = tempBlk.seaAntLife
-						creature.targetX = math.floor(creature.x + i)
-						creature.targetY = math.floor(creature.y + j)
+	for key, creature in pairs(allCreatures) do
+		if creature.hp > 0 then
+			--process food and health
+			creature.foodCurrent = creature.foodCurrent - 0.01
+			if creature.foodCurrent < 0 then
+				creature.foodCurrent = 0
+			end
+			if creature.foodCurrent < creature.foodMin then
+				creature.hp = creature.hp - 0.1
+			end
+			
+			if creature.checkTimer == -2 and creature.moveX == 0 and creature.moveY == 0 then
+				creature.checkTimer = creature.checkTimerMax
+				--choose to move !!make circular!!
+				tempFoodVal = 0
+				creature.targetX = 0
+				creature.targetY = 0
+				for i=-creature.visionDis, creature.visionDis, 1 do
+					for j=-creature.visionDis, creature.visionDis, 1 do
+						tempBlk = accessWldBlock(math.floor(creature.x + i), math.floor(creature.y + j))
+						--calculate how much food value this block has to this creature
+						if creature:testIsFood(tempBlk) > tempFoodVal or (creature:testIsFood(tempBlk) == tempFoodVal and love.math.random(1, 3) == 2) then
+							tempFoodVal = tempBlk.seaAntLife
+							creature.targetX = math.floor(creature.x + i)-- + 0.45
+							creature.targetY = math.floor(creature.y + j)-- + 0.45
+						end
+						
+						--other food tests below
+						
 					end
-					
-					--other food tests below
-					
+				end
+				
+				--creature.moveX = (creature.x - creature.targetX) / math.abs(creature.x - creature.targetX)
+				--creature.moveY = (creature.y - creature.targetY) / math.abs(creature.y - creature.targetY)
+				--[[if creature.targetX - 1 < creature.x and creature.targetX + 1 > creature.x then
+					creature.moveX = 0
+				elseif creature.targetX > creature.x then
+					creature.moveX = 1
+				elseif creature.targetX < creature.x then
+					creature.moveX = -1
+				end
+				
+				if creature.targetY - 1 < creature.y and creature.targetY + 1 > creature.y then
+					creature.moveY = 0
+				elseif creature.targetY > creature.y then
+					creature.moveY = 1
+				elseif creature.targetY < creature.y then
+					creature.moveY = -1
+				end]]
+			elseif creature.checkTimer > 0 then
+				creature.checkTimer = creature.checkTimer - dt
+				if creature.checkTimer <= 0 then
+					creature.checkTimer = -1 --sets it up for doing a task like eating
 				end
 			end
 			
-			creature.moveX = (creature.x - creature.targetX) / math.abs(creature.x - creature.targetX)
-			creature.moveY = (creature.y - creature.targetY) / math.abs(creature.y - creature.targetY)
-		else
-			creature.checkTimer = creature.checkTimer - dt
-		end
-		
-		--make move
-		creature.x = creature.x + (creature.maxSpeed * creature.moveX)
-		creature.y = creature.y + (creature.maxSpeed * creature.moveY)
-		creature.foodCurrent = creature.foodCurrent - (creature.maxSpeed * creature.moveX / 2)
-		creature.foodCurrent = creature.foodCurrent - (creature.maxSpeed * creature.moveY / 2)
-		
-		if math.floor(creature.x) == creature.targetX and math.floor(creature.y) == creature.targetY then
-			--eat stuff
-		end
-		tempBlk = accessWldBlock(math.floor(creature.x), math.floor(creature.y))
-		
-		
-		--count creature as type
-		if creature.animalId == 1 then
-			unlockedInvertebrate = true
-			creatureInvert[updateIndexNoIndexWld] = creatureInvert[updateIndexNoIndexWld] + 1
-		elseif creature.animalId == 2 then
-			unlockedFish = true
-			creatureFish[updateIndexNoIndexWld] = creatureFish[updateIndexNoIndexWld] + 1
-		elseif creature.animalId == 3 then
-			unlockedAmfibian = true
-			creatureAmfib[updateIndexNoIndexWld] = creatureAmfib[updateIndexNoIndexWld] + 1
-		elseif creature.animalId == 4 then
-			unlockedReptile = true
-			creatureRept[updateIndexNoIndexWld] = creatureRept[updateIndexNoIndexWld] + 1
-		elseif creature.animalId == 5 then
-			unlockedBird = true
-			creatureBird[updateIndexNoIndexWld] = creatureBird[updateIndexNoIndexWld] + 1
-		elseif creature.animalId == 6 then
-			unlockedMammal = true
-			creatureMam[updateIndexNoIndexWld] = creatureMam[updateIndexNoIndexWld] + 1
+			creature.moveX = (creature.x - creature.targetX) / math.abs(creature.x - creature.targetX) * -1
+			creature.moveY = (creature.y - creature.targetY) / math.abs(creature.y - creature.targetY) * -1
+			
+			--make move
+			creature:updateSpeed()
+			creature.x = creature.x + (creature.maxSpeed * creature.moveX * creature.currentSpeedMultiplier)
+			creature.y = creature.y + (creature.maxSpeed * creature.moveY * creature.currentSpeedMultiplier)
+			creature.foodCurrent = creature.foodCurrent - ((creature.maxSpeed * creature.currentSpeedMultiplier) / 2)
+			creature.foodCurrent = creature.foodCurrent - ((creature.maxSpeed * creature.currentSpeedMultiplier) / 2)
+			
+			tempBlk = accessWldBlock(math.floor(creature.x), math.floor(creature.y))
+			
+			if math.floor(math.floor(creature.x)) == creature.targetX and math.floor(math.floor(creature.y)) == creature.targetY then
+				--eat stuff
+				--if this block has stuff which can be eaten and this creature is on half hunger (between max and min)
+				if creature:isHungry() and creature:testIsFood(tempBlk) then
+					creature:eatFood(tempBlk)
+				else
+					creature.checkTimer = -2 --allow creature to look for next place to move to
+				end
+			end		
+			
+			--count creature as type
+			if creature.animalId == 1 then
+				unlockedInvertebrate = true
+				creatureInvert[updateIndexNoIndexWld] = creatureInvert[updateIndexNoIndexWld] + 1
+			elseif creature.animalId == 2 then
+				unlockedFish = true
+				creatureFish[updateIndexNoIndexWld] = creatureFish[updateIndexNoIndexWld] + 1
+			elseif creature.animalId == 3 then
+				unlockedAmfibian = true
+				creatureAmfib[updateIndexNoIndexWld] = creatureAmfib[updateIndexNoIndexWld] + 1
+			elseif creature.animalId == 4 then
+				unlockedReptile = true
+				creatureRept[updateIndexNoIndexWld] = creatureRept[updateIndexNoIndexWld] + 1
+			elseif creature.animalId == 5 then
+				unlockedBird = true
+				creatureBird[updateIndexNoIndexWld] = creatureBird[updateIndexNoIndexWld] + 1
+			elseif creature.animalId == 6 then
+				unlockedMammal = true
+				creatureMam[updateIndexNoIndexWld] = creatureMam[updateIndexNoIndexWld] + 1
+			end
 		end
 	end
 	
@@ -517,14 +554,21 @@ function love.draw()
 	
 	--draw stats for debugging creature
 	love.graphics.setColor(0, 0, 0, 0.8)
-	love.graphics.rectangle("fill", 500, 0, 500, 100)
+	love.graphics.rectangle("fill", 500, 0, 500, 120)
 	if #allCreatures > 0 then
 		local ct = allCreatures[1]
 		love.graphics.setColor(1, 1, 1, 1)
 		love.graphics.print("Pos  x: " .. ct.x .. " y: " .. ct.y, 510, 5)
 		love.graphics.print("Targ x: " .. ct.targetX .. " y: " .. ct.targetY, 510, 20)
-		love.graphics.print("HP    : " .. ct.hp, 510, 35)
-		love.graphics.print("Cur Fd: " .. ct.foodCurrent, 510, 50)
+		love.graphics.print("SpeedM: " .. ct.currentSpeedMultiplier, 510, 35)
+		love.graphics.print("C Food: " .. ct.foodCurrent, 510, 50)
+		love.graphics.print("HP    : " .. ct.hp, 510, 65)
+		if ct:isHungry() then
+			love.graphics.print("Hungry: true", 510, 80)
+		else
+			love.graphics.print("Hungry: false", 510, 80)
+		end
+		love.graphics.print("chkTim: " .. ct.checkTimer, 510, 95)
 	end
 	
 	
@@ -620,22 +664,22 @@ function drawCharacter(chr)
 end
 
 function drawCreature(ct)
-	if ct.id == 1 then 		--Invertebrate
-		love.graphics.setColor(0.6, 0.6, 1.0, 1)
-	elseif ct.id == 2 then	--Fish
+	if ct.animalId == 1 then	--Invertebrate
+		love.graphics.setColor(0.3, 0.3, 1.0, 1)--(0.6, 0.6, 1.0, 1)
+	elseif ct.id == 2 then		--Fish
 		love.graphics.setColor(0.8, 0.5, 0.0, 1)
-	elseif ct.id == 2 then	--Amfibian
+	elseif ct.id == 2 then		--Amfibian
 		love.graphics.setColor(0.7, 0.7, 0.0, 1)
-	elseif ct.id == 2 then	--Reptile
+	elseif ct.id == 2 then		--Reptile
 		love.graphics.setColor(0.5, 1.0, 0.5, 1)
-	elseif ct.id == 2 then	--Bird
+	elseif ct.id == 2 then		--Bird
 		love.graphics.setColor(0.8, 0.8, 0.8, 1)
-	elseif ct.id == 2 then	--Mammal
+	elseif ct.id == 2 then		--Mammal
 		love.graphics.setColor(0.4, 0.4, 0.0, 1)
 	else
 		love.graphics.setColor(0.5, 0.5, 0.5, 0.5)
 	end
-	love.graphics.circle("fill", getRelevantBlockX((ct.x * blkW) + wldPosX + (ct.currentSize / 2)), getRelevantBlockY((ct.y * blkH) + wldPosY + (ct.currentSize / 2)), 8, 6)--ct.currentSize, 6)
+	love.graphics.circle("fill", getRelevantBlockX((ct.x * blkW) + wldPosX + (ct.currentSize / 2)), getRelevantBlockY((ct.y * blkH) + wldPosY + (ct.currentSize / 2)), 5, 6)--ct.currentSize, 6)
 end
 
 function drawBlock(blk, x, y)
