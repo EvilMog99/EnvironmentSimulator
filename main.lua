@@ -12,7 +12,7 @@ lavaCount = 0
 forceRain = false
 forceWinter = 0
 volcanoRage = 0
-volcanoRageMax = 1000
+volcanoRageMax = 100
 
 function love.load()
 	face = love.graphics.newImage("face.png")
@@ -93,7 +93,7 @@ function love.update(dt)
 	end
 	
 	forceRain = false
-	if lavaCount > ((xLoop_end * yLoop_end) - (xLoop_end * yLoop_end / 3)) then
+	if lavaCount > ((xLoop_end * yLoop_end) - (xLoop_end * yLoop_end / 2)) then
 		forceWinter = 100
 		dbVal = dbVal .. " + Forced Winter " .. forceWinter .. " "
 	elseif forceWinter > 0 then
@@ -141,11 +141,13 @@ function love.update(dt)
 				lavaCount = lavaCount + 1
 			end
 			
-			if allBlocks[updateCol][j].id == 4 and love.math.random(1, 5000) == 2 then
+			if volcanoRage > 0 and love.math.random(1, 1000 * (volcanoRageMax + 1 - volcanoRage)) == 2 then
+				buildVolcano(updateCol, j, love.math.random(1, 40), love.math.random(1, 40))
+			elseif allBlocks[updateCol][j].id == 4 and love.math.random(1, 10000) == 2 then
 				buildVolcano(updateCol, j, love.math.random(1, 5), love.math.random(1, 5))
-			else if love.math.random(1, 5000 * (volcanoRageMax + 1 - volcanoRage)) == 2 then
+			elseif love.math.random(1, 100000) == 2 then
 				buildVolcano(updateCol, j, love.math.random(1, 30), love.math.random(1, 30))
-			end end
+			end
 		end
 	end
 	

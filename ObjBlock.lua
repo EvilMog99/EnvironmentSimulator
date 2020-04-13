@@ -26,7 +26,7 @@ landPlantMinWater = 5
 
 seaPlantMaxHeat = 60
 seaPlantMinHeat = -1
-seaPlantMaxWater = 250
+seaPlantMaxWater = 450
 seaPlantMinWater = 10
 
 fishMaxHeat = 100
