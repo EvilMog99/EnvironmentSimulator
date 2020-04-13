@@ -174,7 +174,7 @@ function love.update(dt)
 	end
 	
 	forceRain = false
-	if lavaCount > ((xLoop_end * yLoop_end) - (xLoop_end * yLoop_end / 1.5)) then
+	if lavaCount > ((xLoop_end * yLoop_end) / 8) then
 		forceWinter = 100
 		dbVal = dbVal .. " Forced Winter " .. forceWinter .. " "
 	elseif love.math.random(1, 1000) == 2 then
@@ -201,79 +201,79 @@ function love.update(dt)
 	lavaCount = 0
 	for updateCol=xLoop_start, xLoop_end, xLoop_inc do
 		for j=yLoop_start, yLoop_end, yLoop_inc do
-			allBlocks[updateCol][j]:defineType(landAntNoInWld[updateIndexNoIndexWld], seaAntNoInWld[updateIndexNoIndexWld], landPlantNoInWld[readIndexNoIndexWld], seaPlantNoInWld[readIndexNoIndexWld])
+			accessWldBlock(updateCol, j):defineType(landAntNoInWld[updateIndexNoIndexWld], seaAntNoInWld[updateIndexNoIndexWld], landPlantNoInWld[readIndexNoIndexWld], seaPlantNoInWld[readIndexNoIndexWld])
 			
 			--count what life exists in this block
-			if allBlocks[updateCol][j].landAntLife > 0 then
+			if accessWldBlock(updateCol, j).landAntLife > 0 then
 				landAntNoInWld[updateIndexNoIndexWld] = landAntNoInWld[updateIndexNoIndexWld] + 1
 			end
-			if allBlocks[updateCol][j].seaAntLife > 0 then
+			if accessWldBlock(updateCol, j).seaAntLife > 0 then
 				seaAntNoInWld[updateIndexNoIndexWld] = seaAntNoInWld[updateIndexNoIndexWld] + 1
 			end
-			if allBlocks[updateCol][j].landPlantLife > 0 then
+			if accessWldBlock(updateCol, j).landPlantLife > 0 then
 				landPlantNoInWld[updateIndexNoIndexWld] = landPlantNoInWld[updateIndexNoIndexWld] + 1
 			end
-			if allBlocks[updateCol][j].seaPlantLife > 0 then
+			if accessWldBlock(updateCol, j).seaPlantLife > 0 then
 				seaPlantNoInWld[updateIndexNoIndexWld] = seaPlantNoInWld[updateIndexNoIndexWld] + 1
 			end
 			
 			--run block interaction
-			if testBlockExists(updateCol + 1, j) then
-				allBlocks[updateCol][j]:interact(allBlocks[updateCol + 1][j])
-			end
-			if testBlockExists(updateCol - 1, j) then
-				allBlocks[updateCol][j]:interact(allBlocks[updateCol - 1][j])
-			end
-			if testBlockExists(updateCol, j + 1) then
-				allBlocks[updateCol][j]:interact(allBlocks[updateCol][j + 1])
-			end
-			if testBlockExists(updateCol, j -  1) then
-				allBlocks[updateCol][j]:interact(allBlocks[updateCol][j - 1])
-			end
+			--if testBlockExists(updateCol + 1, j) then
+				accessWldBlock(updateCol, j):interact(accessWldBlock(updateCol + 1, j))
+			--end
+			--if testBlockExists(updateCol - 1, j) then
+				accessWldBlock(updateCol, j):interact(accessWldBlock(updateCol - 1, j))
+			--end
+			--if testBlockExists(updateCol, j + 1) then
+				accessWldBlock(updateCol, j):interact(accessWldBlock(updateCol, j + 1))
+			--end
+			--if testBlockExists(updateCol, j -  1) then
+				accessWldBlock(updateCol, j):interact(accessWldBlock(updateCol, j - 1))
+			--end
 			
-			allBlocks[updateCol][j]:resetAfterUpdate()
+			accessWldBlock(updateCol, j):resetAfterUpdate()
 			
-			if allBlocks[updateCol][j].steam > 10 then
-				allRainValue = allRainValue + allBlocks[updateCol][j].steam
-				allBlocks[updateCol][j].steam = 0
+			if accessWldBlock(updateCol, j).steam > 10 then
+				allRainValue = allRainValue + accessWldBlock(updateCol, j).steam
+				accessWldBlock(updateCol, j).steam = 0
 			end
 			
 			if rainOnCycle and allRainValue > 1 then
-				allBlocks[updateCol][j].water = allBlocks[updateCol][j].water + 0.5
+				accessWldBlock(updateCol, j).water = accessWldBlock(updateCol, j).water + 0.5
 				allRainValue = allRainValue - 0.5
 			end
 			
 			if forceRain then
-				allBlocks[updateCol][j].water = allBlocks[updateCol][j].water + 0.5
+				accessWldBlock(updateCol, j).water = accessWldBlock(updateCol, j).water + 0.5
 			end
 			if forceWinter > 0 then
-				allBlocks[updateCol][j].heat = allBlocks[updateCol][j].heat - 1
+				accessWldBlock(updateCol, j).heat = accessWldBlock(updateCol, j).heat - 1
 			end
 			
-			if allBlocks[updateCol][j].id == 4 then
+			if accessWldBlock(updateCol, j).id == 4 then
 				lavaCount = lavaCount + 1
 			end
 			
 			if volcanoRage > 0 and love.math.random(1, 1000 * (volcanoRageMax + 1 - volcanoRage)) == 2 then
 				buildVolcano(updateCol, j, love.math.random(1, 40), love.math.random(1, 40))
-			elseif allBlocks[updateCol][j].id == 4 and love.math.random(1, 10000) == 2 then
+			elseif accessWldBlock(updateCol, j).id == 4 and love.math.random(1, 10000) == 2 then
 				buildVolcano(updateCol, j, love.math.random(1, 5), love.math.random(1, 5))--support volcanoes
-			elseif (allBlocks[updateCol][j].id == 4 and love.math.random(1, 100000000) == 2) 
-				or (allBlocks[updateCol][j].id ~= 4 and love.math.random(1, 1000000) == 2) then
+			elseif (accessWldBlock(updateCol, j).id == 4 and love.math.random(1, 100000000) == 2) 
+				or (accessWldBlock(updateCol, j).id ~= 4 and love.math.random(1, 1000000) == 2) then
 				buildVolcano(updateCol, j, love.math.random(1, 30), love.math.random(1, 30))--create volcanoes
 			end
 			
 			--check for unlocks
-			if not unlockedSeaAnt and allBlocks[updateCol][j].seaAntLife > 0 then
+			if not unlockedSeaAnt and accessWldBlock(updateCol, j).seaAntLife > 0 then
 				unlockedSeaAnt = true
 			end
-			if not unlockedLandAnt and allBlocks[updateCol][j].landAntLife > 0 then
+			if not unlockedLandAnt and accessWldBlock(updateCol, j).landAntLife > 0 then
 				unlockedLandAnt = true
 			end
-			if not unlockedSeaPlant and allBlocks[updateCol][j].seaPlantLife > 0 then
+			if not unlockedSeaPlant and accessWldBlock(updateCol, j).seaPlantLife > 0 then
 				unlockedSeaPlant = true
 			end
-			if not unlockedLandPlant and allBlocks[updateCol][j].landPlantLife > 0 then
+			if not unlockedLandPlant and accessWldBlock(updateCol, j).landPlantLife > 0 then
 				unlockedLandPlant = true
 			end
 		end
@@ -283,6 +283,18 @@ function love.update(dt)
 		volcanoRage = volcanoRage - 1
 	end
 	
+end
+
+function accessWldBlock(x, y)
+	return allBlocks[getRelevantX(x)][getRelevantY(y)]
+end
+
+function getRelevantX(x)
+	return ((x - 1) % wldWidth) + 1
+end
+
+function getRelevantY(y)
+	return ((y - 1) % wldHeight) + 1
 end
 
 function getBlock(x, y)
@@ -307,10 +319,8 @@ function buildVolcano(startX, startY, width, height)
 	--build volcano
 	for i=startX, startX+width, 1 do
 		for j=startY, startY+height, 1 do
-			if testBlockExists(i, j) then
-				allBlocks[i][j].id = blktype.lava
-				allBlocks[i][j].heat = 200
-			end
+			accessWldBlock(i, j).id = blktype.lava
+			accessWldBlock(i, j).heat = 200
 		end
 	end
 end
@@ -331,10 +341,8 @@ function buildSea(startX, startY, width, height)
 	--build sea
 	for i=startX, startX+width, 1 do
 		for j=startY, startY+height, 1 do
-			if testBlockExists(i, j) then
-				allBlocks[i][j].id = blktype.empty
-				allBlocks[i][j].water = 200
-			end
+			accessWldBlock(i, j).id = blktype.empty
+			accessWldBlock(i, j).water = 200
 		end
 	end
 end
@@ -349,13 +357,22 @@ function love.draw()
 	
 	for i=xLoop_start, xLoop_end, xLoop_inc do
 		for j=yLoop_start, yLoop_end, yLoop_inc do
-			tempLocX = (i * blkW) + wldPosX
+			--tempLocX = (getRelevantX(i) * blkW) + wldPosX
+			--tempLocY = (getRelevantY(j) * blkH) + wldPosY
+			--if tempLocX > 0 and tempLocX < windowSizeX and tempLocY > 0 and tempLocY < windowSizeY then
+			--drawBlock(accessWldBlock(i, j), tempLocX, tempLocY)
+			
+			tempLocX = getRelevantX(i + math.floor(wldPosX / blkW))
+			tempLocY = getRelevantY(j + math.floor(wldPosY / blkH))
+			drawBlock(accessWldBlock(i, j), tempLocX * blkW, tempLocY * blkH)
+			--[[tempLocX = (i * blkW) + wldPosX
 			tempLocY = (j * blkH) + wldPosY
 			if tempLocX > 0 and tempLocX < windowSizeX and tempLocY > 0 and tempLocY < windowSizeY then
-				drawBlock(allBlocks[i][j], tempLocX, tempLocY)
-			end
+				drawBlock(accessWldBlock(i, j), tempLocX, tempLocY)
+			end]]
 		end
 	end
+	dbVal = dbVal .. " tempLocX: " .. tempLocX
 	
 	drawCharacter(Player)
 	

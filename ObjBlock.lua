@@ -20,9 +20,9 @@ blktype = {
 blktype = protect(blktype)
 
 landAntMaxHeat = 65
-landAntMinHeat = 10
-landAntMaxWater = 90
-landAntMinWater = 5
+landAntMinHeat = 2
+landAntMaxWater = 30
+landAntMinWater = 2
 
 landPlantMaxHeat = 65
 landPlantMinHeat = 10
@@ -50,7 +50,7 @@ class "Block"-- : extends(classlib)
 {
 --vars
 	id = -1,
-	hp = 100, maxhp = 100,
+	hp = 200, maxhp = 200,
 	timer = 0, maxTimer = 60,
 	canSpread = false,
 	heat = 0, water = 0, landAntLife = 0, landPlantLife = 0, seaAntLife = 0, seaPlantLife = 0, fishLife = 0, steam = 0,
@@ -89,8 +89,8 @@ function Block:__init(newId)
 	self.seaPlantLife = 0
 	self.fishLife = 0
 	self.steam = 0
-	hp = 100
-	maxhp = 100
+	hp = 200
+	maxhp = 200
 end
 
 function Block:copy(target)
