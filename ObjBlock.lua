@@ -39,11 +39,6 @@ seaPlantMinHeat = 5
 seaPlantMaxWater = 450
 seaPlantMinWater = 10
 
-fishMaxHeat = 100
-fishMinHeat = 5
-fishMaxWater = 200
-fishMinWater = 5
-
 
 --class define
 class "Block"-- : extends(classlib)
@@ -53,7 +48,7 @@ class "Block"-- : extends(classlib)
 	hp = 200, maxhp = 200,
 	timer = 0, maxTimer = 60,
 	canSpread = false,
-	heat = 0, water = 0, landAntLife = 0, landPlantLife = 0, seaAntLife = 0, seaPlantLife = 0, fishLife = 0, steam = 0,
+	heat = 0, water = 0, landAntLife = 0, landPlantLife = 0, seaAntLife = 0, seaPlantLife = 0, evolveCreatureId = 0, steam = 0,
 --make sure to include all above in copy func
 
 	moveX = function(self, addx)
@@ -87,7 +82,8 @@ function Block:__init(newId)
 	self.seaAntLife = 0
 	self.landPlantLife = 0
 	self.seaPlantLife = 0
-	self.fishLife = 0
+	self.shrimpFishLife = 0
+	self.evolveCreatureId = 0
 	self.steam = 0
 	hp = 200
 	maxhp = 200
@@ -104,7 +100,7 @@ function Block:copy(target)
 	target.seaAntLife = self.seaAntLife
 	target.landPlantLife = self.landPlantLife
 	target.seaPlantLife = self.seaPlantLife
-	target.fishLife = self.fishLife
+	target.evolveCreatureId = self.evolveCreatureId
 	target.steam = self.steam
 	target.hp = self.hp
 	target.maxhp = self.maxhp
@@ -114,7 +110,7 @@ function Block:defineType(landAntNoInWld, seaAntNoInWld, landPlantNoInWld, seaPl
 	if self.id == blktype.lava then
 		--self.landPlantLife = 0
 		--self.seaPlantLife = 0
-		--self.fishLife = 0
+		--self.evolveCreatureId = 0
 		if self.heat > 100 then
 			self.canSpread = true
 		end
@@ -185,18 +181,18 @@ function Block:defineType(landAntNoInWld, seaAntNoInWld, landPlantNoInWld, seaPl
 	end
 	
 	--for fish life
-	if self.fishLife > 0 then --if plant life exists at all
-		self.fishLife = self.fishLife + Block:calcPlantSurvival(self.heat, self.water, fishMaxHeat, fishMinHeat, fishMaxWater, fishMinWater) --calculate its survival	
+	--[[if self.evolveCreatureId > 0 then --if plant life exists at all
+		self.evolveCreatureId = self.evolveCreatureId + Block:calcPlantSurvival(self.heat, self.water, herbFish_getLifeStats()) --calculate its survival	
 		if self.id ~= 0 then
 			self.seaPlantLife = self.seaPlantLife - 2
 		end
 		
-		if self.fishLife > 200 then
-			self.fishLife = 200
+		if self.evolveCreatureId > 200 then
+			self.evolveCreatureId = 200
 		end
 	elseif self.id == 0 and self.water > 5 and self.heat > 1 and love.math.random(1, 1000000) == 2 then
-		self.fishLife = 1
-	end
+		self.evolveCreatureId = 1
+	end]]
 end
 
 function Block:calcPlantSurvival(heat, water, htMax, htMin, wtMax, wtMin)

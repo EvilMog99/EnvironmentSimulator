@@ -1,10 +1,12 @@
 require("classlib")
 require("ObjBlock")
+require("Creature")
 --local player = require("playerobj")
 
 
 
 allBlocks = {} --array of Block arrays
+allCreatures = {} --table of all Creatures
 allRainValue = 0
 rainTrigger = 1
 rainOnCycle = false
@@ -94,6 +96,18 @@ function love.load()
 	rainTrigger = xLoop_end * yLoop_end * 10
 	
 	Player:resetId(1)
+	
+	local tempCreature = Creature:new(1)
+	tempCreature.x = 10
+	table.insert(allCreatures, tempCreature)
+	
+	tempCreature = Creature:new(2)
+	tempCreature.x = 20
+	table.insert(allCreatures, tempCreature)
+	
+	tempCreature = Creature:new(3)
+	tempCreature.x = 30
+	table.insert(allCreatures, tempCreature)
 	
 	love.window.setFullscreen(true)
 	--windowSizeX, windowSizeY = love.window.getDimensions()
@@ -281,6 +295,10 @@ function love.update(dt)
 		end
 	end
 	
+	for key, creature in pairs(allCreatures) do
+		creature.x = creature.x + creature.walkSpeed
+	end
+	
 	if volcanoRage > 0 then
 		volcanoRage = volcanoRage - 1
 	end
@@ -297,6 +315,15 @@ end
 
 function getRelevantY(y)
 	return ((y - 1) % wldHeight) + 1
+end
+
+--for drawing
+function getRelevantBlockX(x)
+	return ((x - 1) % (wldWidth * blkW)) + 1
+end
+
+function getRelevantBlockY(y)
+	return ((y - 1) % (wldHeight * blkH)) + 1
 end
 
 function getBlock(x, y)
@@ -349,6 +376,8 @@ function buildSea(startX, startY, width, height)
 	end
 end
 
+tempIndexX = 0
+tempIndexY = 0
 tempLocX = 0
 tempLocY = 0
 function love.draw()
@@ -364,9 +393,13 @@ function love.draw()
 			--if tempLocX > 0 and tempLocX < windowSizeX and tempLocY > 0 and tempLocY < windowSizeY then
 			--drawBlock(accessWldBlock(i, j), tempLocX, tempLocY)
 			
-			tempLocX = getRelevantX(i + math.floor(wldPosX / blkW))
-			tempLocY = getRelevantY(j + math.floor(wldPosY / blkH))
-			drawBlock(accessWldBlock(i, j), tempLocX * blkW, tempLocY * blkH)
+			tempIndexX = getRelevantX(i + math.floor(wldPosX / blkW))
+			tempIndexY = getRelevantY(j + math.floor(wldPosY / blkH))
+			tempLocX = tempIndexX * blkW
+			tempLocY = tempIndexY * blkH
+			if tempLocX > 0 and tempLocX < windowSizeX and tempLocY > 0 and tempLocY < windowSizeY then
+				drawBlock(accessWldBlock(i, j), tempLocX, tempLocY)
+			end
 			--[[tempLocX = (i * blkW) + wldPosX
 			tempLocY = (j * blkH) + wldPosY
 			if tempLocX > 0 and tempLocX < windowSizeX and tempLocY > 0 and tempLocY < windowSizeY then
@@ -376,6 +409,10 @@ function love.draw()
 	end
 	
 	drawCharacter(Player)
+	
+	for key, creature in pairs(allCreatures) do
+		drawCreature(creature)
+	end
 	
 	love.graphics.setColor(1, 1, 1, 1)
 	love.graphics.print("Weather: " .. dbVal, 10, 0)
@@ -439,6 +476,17 @@ function drawCharacter(chr)
 	love.graphics.rectangle("fill", chr.x, chr.y, blkW, blkH)
 end
 
+function drawCreature(ct)
+	if ct.id == 1 then
+		love.graphics.setColor(0.9, 0.5, 0.5, 0.9)
+	elseif ct.id == 2 then
+		love.graphics.setColor(0.5, 0.9, 0.5, 0.9)
+	else
+		love.graphics.setColor(0.5, 0.5, 0.9, 0.9)
+	end
+	love.graphics.circle("fill", getRelevantBlockX((ct.x * blkW) + wldX + (blkW / 2)), getRelevantBlockY((ct.y * blkH) + wldY + (blkH / 2)), (blkW / 2), 5)
+end
+
 function drawBlock(blk, x, y)
 	if blk.id > -1 and blk.id < 5 then
 		love.graphics.setColor(getMaterialColor[blk.id]())
@@ -466,10 +514,10 @@ function drawBlock(blk, x, y)
 			--love.graphics.circle("fill", x + wldX + (blkW / 2), y + wldY + (blkH / 2), blk.landAntLife/200 * (blkW / 2), 5)
 		end
 
-		if blk.fishLife > 0 then
+		--[[if blk.fishLife > 0 then
 			love.graphics.setColor(0.8, 0, 0.8, 1)
 			love.graphics.circle("fill", x + wldX + (blkW / 2), y + wldY + (blkH / 2), blk.fishLife/200 * (blkW / 2), 5)
-		end
+		end]]
 		
 		--love.graphics.setColor(0, 0, 0)
 		--love.graphics.rectangle("line", x + wldX, y + wldY, blkW, blkH)
