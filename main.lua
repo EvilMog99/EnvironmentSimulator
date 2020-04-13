@@ -28,12 +28,14 @@ unlockedSeaPlant = false
 unlockedLandPlant = false
 unlockedLandAnt = false
 
+romingSpeed = 200
+
 function love.load()
 	face = love.graphics.newImage("face.png")
 	wldPosX = 0
 	wldPosY = 0
 	wldX, wldY = -20, -20
-	blkW, blkH = 5, 5
+	blkW, blkH = 10, 10
 	moveUp, moveDown, moveLeft, moveRight = false, false, false, false
 	updateCol = 1 --for setting which column will be updated next
 	--windowWidth, windowHeight = love.window.getDimensions()
@@ -49,10 +51,10 @@ function love.load()
 	dbVal = ""
 	
 	xLoop_start = 1
-	xLoop_end = 200 --170 -- set world width
+	xLoop_end = 300 --170 -- set world width
 	xLoop_inc = 1
 	yLoop_start = 1
-	yLoop_end = 200 --130 -- set world height
+	yLoop_end = 300 --130 -- set world height
 	yLoop_inc = 1
 	for i=xLoop_start, xLoop_end, xLoop_inc do
 		allBlocks[i] = {}
@@ -81,6 +83,12 @@ function love.load()
 	rainTrigger = xLoop_end * yLoop_end * 10
 	
 	Player:resetId(1)
+	
+	love.window.setFullscreen(true)
+	--windowSizeX, windowSizeY = love.window.getDimensions()
+	--love.graphics.setMode(0, 0, false, false)
+	windowSizeX = love.graphics.getWidth()
+	windowSizeY = love.graphics.getHeight()
 end
 
 
@@ -101,18 +109,18 @@ function love.update(dt)
 	
 	--update movement
 	if moveUp then
-		wldPosY = wldPosY + (100 * dt) 
+		wldPosY = wldPosY + (romingSpeed * dt) 
 		--Player:moveY(-1 * (dt + 1))
 	else if moveDown then
-		wldPosY = wldPosY - (100 * dt) 
+		wldPosY = wldPosY - (romingSpeed * dt) 
 		--Player:moveY(1 * (dt + 1))
 	end end
 	
 	if moveLeft then
-		wldPosX = wldPosX + (100 * dt) 
+		wldPosX = wldPosX + (romingSpeed * dt) 
 		--Player:moveX(-1 * (dt + 1))
 	else if moveRight then
-		wldPosX = wldPosX - (100 * dt) 
+		wldPosX = wldPosX - (romingSpeed * dt) 
 		--Player:moveX(1 * (dt + 1))
 	end end
 	
@@ -286,7 +294,7 @@ function love.draw()
 		for j=yLoop_start, yLoop_end, yLoop_inc do
 			tempLocX = (i * blkW) + wldPosX
 			tempLocY = (j * blkH) + wldPosY
-			if tempLocX > 0 and tempLocY > 0 then -- and tempLocX < love.window.getWidth()  and tempLocY < love.window.getHeight() then
+			if tempLocX > 0 and tempLocX < windowSizeX and tempLocY > 0 and tempLocY < windowSizeY then
 				drawBlock(allBlocks[i][j], tempLocX, tempLocY)
 			end
 		end
@@ -378,7 +386,7 @@ function drawBlock(blk, x, y)
 			--love.graphics.circle("fill", x + wldX + (blkW / 2), y + wldY + (blkH / 2), blk.seaAntLife/200 * (blkW / 2), 5)
 		end
 		if blk.landAntLife > 0 then
-			love.graphics.setColor(0.7, 0.4, 0, 1)
+			love.graphics.setColor(0.8, 0.4, 0, 1)
 			drawAnts(x + wldX, y + wldY, blk.landAntLife)
 			--love.graphics.circle("fill", x + wldX + (blkW / 2), y + wldY + (blkH / 2), blk.landAntLife/200 * (blkW / 2), 5)
 		end
@@ -398,17 +406,54 @@ function drawAnts(x, y, level)
 	if level > 0 then
 		love.graphics.rectangle("fill", x + 2, y + 2, 1, 1)
 	end
-	if level > 40 then
-		love.graphics.rectangle("fill", x + 2, y + 1, 1, 1)
+	if level > 20 then
+		love.graphics.rectangle("fill", x + 6, y + 1, 1, 1)
 	end
-	if level > 80 then
+	if level > 30 then
 		love.graphics.rectangle("fill", x + 4, y, 1, 1)
 	end
+	if level > 40 then
+		love.graphics.rectangle("fill", x + 3, y + 8, 1, 1)
+	end
+	if level > 50 then
+		love.graphics.rectangle("fill", x + 1, y + 4, 1, 1)
+	end
+	if level > 60 then
+		love.graphics.rectangle("fill", x + 8, y + 5, 1, 1)
+	end
+	if level > 70 then
+		love.graphics.rectangle("fill", x + 4, y + 9, 1, 1)
+	end
+	if level > 80 then
+		love.graphics.rectangle("fill", x + 7, y + 9, 1, 1)
+	end
+	if level > 90 then
+		love.graphics.rectangle("fill", x + 1, y + 4, 1, 1)
+	end
+	
+	if level > 100 then
+		love.graphics.rectangle("fill", x + 6, y + 3, 1, 1)
+	end
+	if level > 110 then
+		love.graphics.rectangle("fill", x + 5, y + 6, 1, 1)
+	end
 	if level > 120 then
-		love.graphics.rectangle("fill", x, y + 2, 1, 1)
+		love.graphics.rectangle("fill", x + 6, y + 8, 1, 1)
+	end
+	if level > 130 then
+		love.graphics.rectangle("fill", x + 7, y + 4, 1, 1)
+	end
+	if level > 140 then
+		love.graphics.rectangle("fill", x + 7, y + 5, 1, 1)
+	end
+	if level > 150 then
+		love.graphics.rectangle("fill", x + 5, y + 3, 1, 1)
 	end
 	if level > 160 then
-		love.graphics.rectangle("fill", x + 1, y + 4, 1, 1)
+		love.graphics.rectangle("fill", x + 7, y + 2, 1, 1)
+	end
+	if level > 170 then
+		love.graphics.rectangle("fill", x + 8, y + 3, 1, 1)
 	end
 end
 
