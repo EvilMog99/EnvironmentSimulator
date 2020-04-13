@@ -33,21 +33,21 @@ function love.load()
 		end
 	end
 	
-	buildSea(6, 15, 10, 10)
-	buildSea(22, 15, 15, 12)
-	buildSea(20, 8, 5, 5)
-	buildSea(30, 10, 20, 50)
-	buildSea(20, 30, 50, 20)
+	--buildSea(6, 15, 10, 10)
+	--buildSea(22, 15, 15, 12)
+	--buildSea(20, 8, 5, 5)
+	--buildSea(30, 10, 20, 50)
+	--buildSea(20, 30, 50, 20)
 	
-	buildSea(100, 10, 50, 30)
-	buildSea(20, 100, 50, 50)
-	buildSea(150, 10, 30, 80)
-	buildSea(20, 150, 100, 30)
+	--buildSea(100, 10, 50, 30)
+	--buildSea(20, 100, 50, 50)
+	--buildSea(150, 10, 30, 80)
+	--buildSea(20, 150, 100, 30)
 	
 	buildSea(20, 20, 130, 90)
 	
-	buildVolcano(10, 5, 3, 3)
-	buildVolcano(35, 20, 4, 7)
+	--buildVolcano(10, 5, 3, 3)
+	--buildVolcano(35, 20, 4, 7)
 	
 	rainTrigger = xLoop_end * yLoop_end * 10
 	
@@ -106,13 +106,13 @@ function love.update(dt)
 				allBlocks[updateCol][j].steam = 0
 			end
 			
-			if rainOnCycle and allRainValue > 10 then
-				allBlocks[updateCol][j].water = allBlocks[updateCol][j].water + 1
-				allRainValue = allRainValue - 1
+			if rainOnCycle and allRainValue > 1 then
+				allBlocks[updateCol][j].water = allBlocks[updateCol][j].water + 0.5
+				allRainValue = allRainValue - 0.5
 			end
 			
-			if allBlocks[updateCol][j].id == 4 and love.math.random(1, 10000) == 2 then
-				buildVolcano(updateCol, j, love.math.random(1, 10), love.math.random(1, 10))
+			if allBlocks[updateCol][j].id == 4 and love.math.random(1, 5000) == 2 then
+				buildVolcano(updateCol, j, love.math.random(1, 5), love.math.random(1, 5))
 			else if love.math.random(1, 500000) == 2 then
 				buildVolcano(updateCol, j, love.math.random(1, 30), love.math.random(1, 30))
 			end end
@@ -142,6 +142,18 @@ function buildVolcano(startX, startY, width, height)
 		end
 	end
 end
+
+--[[function buildVolcanoCircle(startX, startY, width, height)
+	--build volcano
+	for i=startX, startX+width, 1 do
+		for j=startY, startY+height, 1 do
+			if testBlockExists(i, j) then
+				allBlocks[i][j].id = blktype.lava
+				allBlocks[i][j].heat = 200
+			end
+		end
+	end
+end]]
 
 function buildSea(startX, startY, width, height)
 	--build sea
@@ -214,7 +226,7 @@ function drawBlock(blk, x, y)
 		
 		if blk.plantLife > 0 then
 			love.graphics.setColor(0, 1, 0, 1)
-			love.graphics.circle("fill", x + wldX + (blkW / 2), y + wldY + (blkH / 2), blk.plantLife/200 * blkW, 5)
+			love.graphics.circle("fill", x + wldX + (blkW / 2), y + wldY + (blkH / 2), blk.plantLife/200 * (blkW / 2), 5)
 		end
 		
 		--love.graphics.setColor(0, 0, 0)

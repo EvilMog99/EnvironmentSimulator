@@ -19,10 +19,10 @@ blktype = {
 
 blktype = protect(blktype)
 
-plantMaxHeat = 85
-plantMinHeat = 5
-plantMaxWater = 100
-plantMinWater = 5
+plantMaxHeat = 65
+plantMinHeat = 20
+plantMaxWater = 90
+plantMinWater = 10
 
 
 --class define
@@ -95,13 +95,13 @@ function Block:defineType()
 		if self.plantLife > 200 then
 			self.plantLife = 200
 		end
-	else if self.id ~= 0 and self.id ~= 4 and self.water > 5 and self.heat > 5 and love.math.random(1, 1000) == 2 then
-		--self.plantLife = 1
+	else if self.id ~= 0 and self.id ~= 4 and self.water > 5 and self.heat > 5 and love.math.random(1, 1000000) == 2 then
+		self.plantLife = 1
 	end end
 end
 
 function Block:calcPlantSurvival(heat, water)
-	ht = (plantMaxHeat - heat) + (heat - plantMinHeat)
+	--[[ht = (plantMaxHeat - heat) + (heat - plantMinHeat)
 	wt = (plantMaxWater - water) + (water - plantMinWater)
 	if ht > 10 then
 		ht = 10
@@ -114,7 +114,36 @@ function Block:calcPlantSurvival(heat, water)
 		return wt
 	else 
 		return ht
+	end]]
+	
+	local wt = 0
+	local ht = 0
+	
+	--[[if heat > plantMaxHeat then
+		ht = plantMaxHeat - heat
+	else if heat < plantMinHeat then
+		ht = heat - plantMinHeat
+	end end
+	
+	if water > plantMaxWater then
+		wt = plantMaxWater - water
+	else if heat < plantMinWater then
+		wt = water - plantMinWater
+	end end]]
+	
+	if heat < plantMaxHeat and heat > plantMinHeat then
+		ht = 1
+	else
+		ht = -2
 	end
+	
+	if water < plantMaxWater and heat > plantMinWater then
+		wt = 1
+	else
+		wt = -2
+	end
+	
+	return wt + ht
 end
 
 function Block:interact(neighbour)
@@ -145,8 +174,9 @@ function Block:interact(neighbour)
 		end
 	end end end end
 	
-	if self.plantLife > 5 and neighbour.id ~= 0 and neighbour.id ~= 4 then
-		neighbour.plantLife, self.plantLife = self:mediumShare(neighbour.plantLife, self.plantLife)
+	if self.plantLife > 5 and neighbour.plantLife == 0 and neighbour.id ~= 0 and neighbour.id ~= 4 then
+		--neighbour.plantLife, self.plantLife = self:mediumShare(neighbour.plantLife, self.plantLife)
+		neighbour.plantLife = 1
 	end
 	
 	self:checkValues()
