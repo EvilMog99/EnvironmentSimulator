@@ -4,7 +4,10 @@ require("ObjBlock")
 
 
 
-local allBlocks = {} --array of Block arrays
+allBlocks = {} --array of Block arrays
+allRainValue = 0
+rainTrigger = 1
+rainOnCycle = false
 
 function love.load()
 	face = love.graphics.newImage("face.png")
@@ -46,12 +49,14 @@ function love.load()
 	buildVolcano(10, 5, 3, 3)
 	buildVolcano(35, 20, 4, 7)
 	
+	rainTrigger = xLoop_end * yLoop_end * 10
+	
 	Player:resetId(1)
 end
 
 
 function love.update(dt)
-	--dbVal = ""
+	dbVal = ""
 	if moveUp then
 		Player:moveY(-1 * (dt + 1))
 	else if moveDown then
@@ -68,6 +73,13 @@ function love.update(dt)
 	updateCol = updateCol + 1
 	if updateCol > xLoop_end then
 		updateCol = 1
+	end
+	
+	if (love.math.random(1, 100) == 2 and allRainValue > rainTrigger * 1.5) or (rainOnCycle and allRainValue > love.math.random(1, rainTrigger)) then
+		rainOnCycle = true
+		dbVal = "Raining"
+	else
+		rainOnCycle = false
 	end
 	
 	for updateCol=xLoop_start, xLoop_end, xLoop_inc do
@@ -89,9 +101,21 @@ function love.update(dt)
 			
 			allBlocks[updateCol][j]:resetAfterUpdate()
 			
-			if love.math.random(1, 100000) == 2 then
-				buildVolcano(updateCol, j, love.math.random(1, 30), love.math.random(1, 30))
+			if allBlocks[updateCol][j].steam > 10 then
+				allRainValue = allRainValue + allBlocks[updateCol][j].steam
+				allBlocks[updateCol][j].steam = 0
 			end
+			
+			if rainOnCycle and allRainValue > 10 then
+				allBlocks[updateCol][j].water = allBlocks[updateCol][j].water + 1
+				allRainValue = allRainValue - 1
+			end
+			
+			if allBlocks[updateCol][j].id == 4 and love.math.random(1, 10000) == 2 then
+				buildVolcano(updateCol, j, love.math.random(1, 10), love.math.random(1, 10))
+			else if love.math.random(1, 500000) == 2 then
+				buildVolcano(updateCol, j, love.math.random(1, 30), love.math.random(1, 30))
+			end end
 		end
 	end
 	
