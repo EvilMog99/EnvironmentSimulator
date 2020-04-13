@@ -145,7 +145,7 @@ function love.update(dt)
 				buildVolcano(updateCol, j, love.math.random(1, 40), love.math.random(1, 40))
 			elseif allBlocks[updateCol][j].id == 4 and love.math.random(1, 10000) == 2 then
 				buildVolcano(updateCol, j, love.math.random(1, 5), love.math.random(1, 5))--support volcanoes
-			elseif (allBlocks[updateCol][j].id == 4 and love.math.random(1, 100000000) == 2) 
+			elseif (allBlocks[updateCol][j].id == 4 and love.math.random(1, 1000) == 2) 
 				or (allBlocks[updateCol][j].id ~= 4 and love.math.random(1, 1000000) == 2) then
 				buildVolcano(updateCol, j, love.math.random(1, 30), love.math.random(1, 30))--create volcanoes
 			end
