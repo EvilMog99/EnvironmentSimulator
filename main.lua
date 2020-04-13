@@ -21,13 +21,17 @@ seaAntNoInWld = {0, 0}
 landPlantNoInWld = {0, 0}
 seaPlantNoInWld = {0, 0}
 
-unlockedSeaAnt = true
-unlockedSeaPlant = true
-unlockedLandPlant = true
-unlockedLandAnt = true
+seaCreatureType01NoInWld = {0, 0}
+
+unlockedSeaAnt = false
+unlockedSeaPlant = false
+unlockedLandPlant = false
+unlockedLandAnt = false
 
 function love.load()
 	face = love.graphics.newImage("face.png")
+	wldPosX = 0
+	wldPosY = 0
 	wldX, wldY = -20, -20
 	blkW, blkH = 5, 5
 	moveUp, moveDown, moveLeft, moveRight = false, false, false, false
@@ -45,10 +49,10 @@ function love.load()
 	dbVal = ""
 	
 	xLoop_start = 1
-	xLoop_end = 170 -- set world width
+	xLoop_end = 200 --170 -- set world width
 	xLoop_inc = 1
 	yLoop_start = 1
-	yLoop_end = 130 -- set world height
+	yLoop_end = 200 --130 -- set world height
 	yLoop_inc = 1
 	for i=xLoop_start, xLoop_end, xLoop_inc do
 		allBlocks[i] = {}
@@ -69,7 +73,7 @@ function love.load()
 	--buildSea(150, 10, 30, 80)
 	--buildSea(20, 150, 100, 30)
 	
-	buildSea(20, 20, 130, 90)
+	buildSea(20, 20, xLoop_end - 20, yLoop_end - 20)
 	
 	--buildVolcano(10, 5, 3, 3)
 	--buildVolcano(35, 20, 4, 7)
@@ -97,15 +101,19 @@ function love.update(dt)
 	
 	--update movement
 	if moveUp then
-		Player:moveY(-1 * (dt + 1))
+		wldPosY = wldPosY + (100 * dt) 
+		--Player:moveY(-1 * (dt + 1))
 	else if moveDown then
-		Player:moveY(1 * (dt + 1))
+		wldPosY = wldPosY - (100 * dt) 
+		--Player:moveY(1 * (dt + 1))
 	end end
 	
 	if moveLeft then
-		Player:moveX(-1 * (dt + 1))
+		wldPosX = wldPosX + (100 * dt) 
+		--Player:moveX(-1 * (dt + 1))
 	else if moveRight then
-		Player:moveX(1 * (dt + 1))
+		wldPosX = wldPosX - (100 * dt) 
+		--Player:moveX(1 * (dt + 1))
 	end end
 	
 	--update all blocks
@@ -197,6 +205,20 @@ function love.update(dt)
 				or (allBlocks[updateCol][j].id ~= 4 and love.math.random(1, 1000000) == 2) then
 				buildVolcano(updateCol, j, love.math.random(1, 30), love.math.random(1, 30))--create volcanoes
 			end
+			
+			--check for unlocks
+			if not unlockedSeaAnt and allBlocks[updateCol][j].seaAntLife > 0 then
+				unlockedSeaAnt = true
+			end
+			if not unlockedLandAnt and allBlocks[updateCol][j].landAntLife > 0 then
+				unlockedLandAnt = true
+			end
+			if not unlockedSeaPlant and allBlocks[updateCol][j].seaPlantLife > 0 then
+				unlockedSeaPlant = true
+			end
+			if not unlockedLandPlant and allBlocks[updateCol][j].landPlantLife > 0 then
+				unlockedLandPlant = true
+			end
 		end
 	end
 	
@@ -252,7 +274,8 @@ function buildSea(startX, startY, width, height)
 	end
 end
 
-
+tempLocX = 0
+tempLocY = 0
 function love.draw()
 	--updateWldPosition()
 	
@@ -261,53 +284,46 @@ function love.draw()
 	
 	for i=xLoop_start, xLoop_end, xLoop_inc do
 		for j=yLoop_start, yLoop_end, yLoop_inc do
-			drawBlock(allBlocks[i][j], i * blkW, j * blkH)
+			tempLocX = (i * blkW) + wldPosX
+			tempLocY = (j * blkH) + wldPosY
+			if tempLocX > 0 and tempLocY > 0 then -- and tempLocX < love.window.getWidth()  and tempLocY < love.window.getHeight() then
+				drawBlock(allBlocks[i][j], tempLocX, tempLocY)
+			end
 		end
 	end
 	
 	drawCharacter(Player)
 	
 	love.graphics.setColor(1, 1, 1, 1)
-	love.graphics.print("Weather: " .. dbVal, 100, 0)
+	love.graphics.print("Weather: " .. dbVal, 10, 0)
+	
+	local yPos = 11
 	if unlockedSeaAnt then
-		if seaAntNoInWld[readIndexNoIndexWld] > 0 then
-			love.graphics.setColor(1, 1, 1, 1)
-		else
-			love.graphics.setColor(0.6, 0.6, 0.6, 0.6)
-		end
-		love.graphics.print("Plankton:", 100, 11)
-		love.graphics.print("" .. seaAntNoInWld[readIndexNoIndexWld], 160, 11)
+		drawPopulationToScreen(seaAntNoInWld[readIndexNoIndexWld], yPos, "Plankton")
+		yPos = yPos + 11
 	end
-	
-	if unlockedLandAnt then
-		if landAntNoInWld[readIndexNoIndexWld] > 0 then
-			love.graphics.setColor(1, 1, 1, 1)
-		else
-			love.graphics.setColor(0.6, 0.6, 0.6, 0.6)
-		end
-		love.graphics.print("Ants:", 100, 22)
-		love.graphics.print("" .. landAntNoInWld[readIndexNoIndexWld], 160, 22)
-	end
-	
 	if unlockedSeaPlant then
-		if seaPlantNoInWld[readIndexNoIndexWld] > 0 then
-			love.graphics.setColor(1, 1, 1, 1)
-		else
-			love.graphics.setColor(0.6, 0.6, 0.6, 0.6)
-		end
-		love.graphics.print("Coral:", 100, 33)
-		love.graphics.print("" .. seaPlantNoInWld[readIndexNoIndexWld], 160, 33)
+		drawPopulationToScreen(seaPlantNoInWld[readIndexNoIndexWld], yPos, "Coral")
+		yPos = yPos + 11
 	end
-	
 	if unlockedLandPlant then
-		if landPlantNoInWld[readIndexNoIndexWld] > 0 then
-			love.graphics.setColor(1, 1, 1, 1)
-		else
-			love.graphics.setColor(0.6, 0.6, 0.6, 0.6)
-		end
-		love.graphics.print("Plants:", 100, 44)
-		love.graphics.print("" .. landPlantNoInWld[readIndexNoIndexWld], 160, 44)
+		drawPopulationToScreen(landPlantNoInWld[readIndexNoIndexWld], yPos, "Plants")
+		yPos = yPos + 11
 	end
+	if unlockedLandAnt then
+		drawPopulationToScreen(landAntNoInWld[readIndexNoIndexWld], yPos, "Ants")
+		yPos = yPos + 11
+	end
+end
+
+function drawPopulationToScreen(noInWld, yPos, str)
+	if noInWld > 0 then
+		love.graphics.setColor(0.7, 0.7, 0.7, 1)
+	else
+		love.graphics.setColor(0.5, 0.5, 0.5, 0.5)
+	end
+	love.graphics.print(str .. ":", 10, yPos)
+	love.graphics.print("" .. noInWld, 70, yPos)
 end
 
 local getMaterialColor = {
@@ -362,7 +378,7 @@ function drawBlock(blk, x, y)
 			--love.graphics.circle("fill", x + wldX + (blkW / 2), y + wldY + (blkH / 2), blk.seaAntLife/200 * (blkW / 2), 5)
 		end
 		if blk.landAntLife > 0 then
-			love.graphics.setColor(0.4, 0.4, 0, 1)
+			love.graphics.setColor(0.7, 0.4, 0, 1)
 			drawAnts(x + wldX, y + wldY, blk.landAntLife)
 			--love.graphics.circle("fill", x + wldX + (blkW / 2), y + wldY + (blkH / 2), blk.landAntLife/200 * (blkW / 2), 5)
 		end
