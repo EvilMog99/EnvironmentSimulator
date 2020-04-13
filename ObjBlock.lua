@@ -29,10 +29,10 @@ seaPlantMinHeat = 1
 seaPlantMaxWater = 250
 seaPlantMinWater = 20
 
-fishMaxHeat = 65
-fishMinHeat = 20
-fishMaxWater = 90
-fishMinWater = 10
+fishMaxHeat = 100
+fishMinHeat = 5
+fishMaxWater = 200
+fishMinWater = 5
 
 
 --class define
@@ -135,14 +135,18 @@ function Block:defineType()
 	end end
 	
 	--for fish life
-	--[[if self.landPlantLife > 0 then --if plant life exists at all
-		self.landPlantLife = self.landPlantLife + Block:calcPlantSurvival(self.heat, self.water) --calculate its survival	
-		if self.landPlantLife > 200 then
-			self.landPlantLife = 200
+	if self.fishLife > 0 then --if plant life exists at all
+		self.fishLife = self.fishLife + Block:calcPlantSurvival(self.heat, self.water, fishMaxHeat, fishMinHeat, fishMaxWater, fishMinWater) --calculate its survival	
+		if self.id ~= 0 then
+			self.seaPlantLife = self.seaPlantLife - 2
 		end
-	else if self.id ~= 0 and self.id ~= 4 and self.water > 5 and self.heat > 5 and love.math.random(1, 1000000) == 2 then
-		self.landPlantLife = 1
-	end end]]
+		
+		if self.fishLife > 200 then
+			self.fishLife = 200
+		end
+	else if self.id == 0 and self.water > 5 and self.heat > 1 and love.math.random(1, 1000000) == 2 then
+		self.fishLife = 1
+	end end
 end
 
 function Block:calcPlantSurvival(heat, water, htMax, htMin, wtMax, wtMin)
@@ -207,7 +211,7 @@ function Block:interact(neighbour)
 end
 
 function Block:evaporateWater()
-	if self.water > 10 and self.heat > 109 then
+	if self.water > 10 and (self.heat > 109 or self.water > 210) then
 		self.water = self.water - 10
 		self.steam = self.steam + 10
 		self.heat = self.heat - 10

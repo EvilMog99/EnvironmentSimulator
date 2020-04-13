@@ -10,6 +10,8 @@ rainTrigger = 1
 rainOnCycle = false
 lavaCount = 0
 forceRain = false
+volcanoRage = 0
+volcanoRageMax = 1000
 
 function love.load()
 	face = love.graphics.newImage("face.png")
@@ -18,6 +20,7 @@ function love.load()
 	moveUp, moveDown, moveLeft, moveRight = false, false, false, false
 	updateCol = 1 --for setting which column will be updated next
 	--windowWidth, windowHeight = love.window.getDimensions()
+	volcanoRage = volcanoRageMax -- how frequent volcanoes spawn - starting at 0 makes it nice and slow
 	
 	dbVal = ""
 	
@@ -77,9 +80,13 @@ function love.update(dt)
 		updateCol = 1
 	end
 	
+	if volcanoRage > 0 then
+		dbVal = dbVal .. "Volcano Rage: " .. volcanoRage .. " "
+	end
+	
 	if (love.math.random(1, 100) == 2 and allRainValue > rainTrigger * 1.5) or (rainOnCycle and allRainValue > love.math.random(1, rainTrigger)) then
 		rainOnCycle = true
-		dbVal = "Raining"
+		dbVal = dbVal .. "Raining "
 	else
 		rainOnCycle = false
 	end
@@ -87,7 +94,7 @@ function love.update(dt)
 	forceRain = false
 	if lavaCount > ((xLoop_end * yLoop_end) - 200) then
 		forceRain = true
-		dbVal = dbVal .. " + Forced Raining"
+		dbVal = dbVal .. " + Forced Raining "
 	end
 	lavaCount = 0
 	for updateCol=xLoop_start, xLoop_end, xLoop_inc do
@@ -129,10 +136,14 @@ function love.update(dt)
 			
 			if allBlocks[updateCol][j].id == 4 and love.math.random(1, 5000) == 2 then
 				buildVolcano(updateCol, j, love.math.random(1, 5), love.math.random(1, 5))
-			else if love.math.random(1, 500000) == 2 then
+			else if love.math.random(1, 5000 * (volcanoRageMax + 1 - volcanoRage)) == 2 then
 				buildVolcano(updateCol, j, love.math.random(1, 30), love.math.random(1, 30))
 			end end
 		end
+	end
+	
+	if volcanoRage > 0 then
+		volcanoRage = volcanoRage - 1
 	end
 	
 end
@@ -247,6 +258,10 @@ function drawBlock(blk, x, y)
 		if blk.landPlantLife > 0 then
 			love.graphics.setColor(0, 1, 0, 1)
 			love.graphics.circle("fill", x + wldX + (blkW / 2), y + wldY + (blkH / 2), blk.landPlantLife/200 * (blkW / 2), 5)
+		end
+		if blk.fishLife > 0 then
+			love.graphics.setColor(0.8, 0, 0.8, 1)
+			love.graphics.circle("fill", x + wldX + (blkW / 2), y + wldY + (blkH / 2), blk.fishLife/200 * (blkW / 2), 5)
 		end
 		
 		--love.graphics.setColor(0, 0, 0)
