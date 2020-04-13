@@ -21,6 +21,8 @@ function love.update(dt)
 	else if moveRight then
 		x = x + 1
 	end end
+	
+	Block:move(2, 1)
 end
 
 
@@ -30,6 +32,14 @@ function love.draw()
 	
 	love.graphics.setColor(1, 1, 1, 0.5)
 	love.graphics.draw(face, 0, 300)
+	
+	if Block.id == 1 then
+		love.graphics.setColor(0, 0.6, 0.1)
+	else
+		love.graphics.setColor(0.6, 0.1, 0)
+	end
+	love.graphics.rectangle("fill", Block.x, Block.y, 20, 20)
+	Block.reset(Block, 1)
 	
 	love.graphics.setColor(1, 1, 1, 1)
 	love.graphics.print("Debug: " .. dbVal, 400, 300)
@@ -57,3 +67,19 @@ end
 function love.keyreleased(key, scancode, isrepeat)
 	switch[scancode](false)
 end
+
+
+--objects
+Block = {
+	id = -1,
+	x = 0, y = 0,
+	move = function(self, addx, addy)
+				self.x = self.x + addx
+				self.y = self.y + addy
+			end
+}
+
+function Block:reset(newid)
+	self.id = newid
+end
+
