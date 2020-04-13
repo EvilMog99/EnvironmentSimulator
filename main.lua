@@ -264,7 +264,7 @@ function love.update(dt)
 			accessWldBlock(updateCol, j):interact(accessWldBlock(updateCol, j - 1))
 			
 			--Create Invertebrate
-			if accessWldBlock(updateCol, j).evolveCreatureId == 1 and creatureInvert[readIndexNoIndexWld] < 1 then
+			if accessWldBlock(updateCol, j).evolveCreatureId == 1 and (creatureInvert[readIndexNoIndexWld] == 0 or (creatureInvert[readIndexNoIndexWld] > 0 and love.math.random(1, 1000) == 2)) then
 				table.insert(allCreatures, Creature:new(1, updateCol + (blkW / 20), j + (blkH / 20)
 					, -4, 0			-- Food
 					, 1, 0			-- Attack
@@ -324,10 +324,14 @@ function love.update(dt)
 	
 	--delete creatures that aren't in use
 	for key, creature in pairs(allCreatures) do
-		if creature == nil or creature.hp <= 0 then
-			table.remove(allCreatures, key)
+		if creature.hp <= 0 then
+			--creature = nil
 			break;
 		end
+		--[[if creature == nil or creature.hp <= 0 then
+			table.remove(allCreatures, key)
+			break;
+		end]]
 	end
 	
 	for key, creature in pairs(allCreatures) do
@@ -341,7 +345,7 @@ function love.update(dt)
 				creature.hp = creature.hp - 0.1
 			end
 			
-			if creature.checkTimer == -2 and creature.moveX == 0 and creature.moveY == 0 then
+			if creature.checkTimer == -2 then
 				creature.checkTimer = creature.checkTimerMax
 				--choose to move !!make circular!!
 				tempFoodVal = 0
@@ -360,6 +364,11 @@ function love.update(dt)
 						--other food tests below
 						
 					end
+				end
+				
+				if creature.targetX == 0 and creature.targetY == 0 then
+					creature.targetX = love.math.random(1, creature.visionDis * 2) - creature.visionDis
+					creature.targetY = love.math.random(1, creature.visionDis * 2) - creature.visionDis
 				end
 				
 				--creature.moveX = (creature.x - creature.targetX) / math.abs(creature.x - creature.targetX)
@@ -406,7 +415,20 @@ function love.update(dt)
 				else
 					creature.checkTimer = -2 --allow creature to look for next place to move to
 				end
-			end		
+			elseif creature.checkTimer == -1 then
+				creature.checkTimer = -2
+			end
+
+			--[[if creature:isHungry() then -- if is hungry deduct hp
+				creature.hp = creature.hp - 0.1
+			--if is half way grown, can have children
+			elseif creature.currentSize > creature.birthSize + ((creature.maxSize - creature.birthSize) / 2) then
+				
+			--if still can grow
+			elseif creature.currentSize < creature.maxSize then 
+				creature.currentSize = creature.currentSize + 0.1
+				creature.foodCurrent = creature.foodCurrent - 0.1
+			end]]
 			
 			--count creature as type
 			if creature.animalId == 1 then
@@ -665,7 +687,7 @@ end
 
 function drawCreature(ct)
 	if ct.animalId == 1 then	--Invertebrate
-		love.graphics.setColor(0.3, 0.3, 1.0, 1)--(0.6, 0.6, 1.0, 1)
+		love.graphics.setColor(0.4, 0.2, 1.0, 1)--(0.6, 0.6, 1.0, 1)
 	elseif ct.id == 2 then		--Fish
 		love.graphics.setColor(0.8, 0.5, 0.0, 1)
 	elseif ct.id == 2 then		--Amfibian
@@ -679,7 +701,7 @@ function drawCreature(ct)
 	else
 		love.graphics.setColor(0.5, 0.5, 0.5, 0.5)
 	end
-	love.graphics.circle("fill", getRelevantBlockX((ct.x * blkW) + wldPosX + (ct.currentSize / 2)), getRelevantBlockY((ct.y * blkH) + wldPosY + (ct.currentSize / 2)), 5, 6)--ct.currentSize, 6)
+	love.graphics.circle("fill", getRelevantBlockX((ct.x * blkW) + wldPosX + (ct.currentSize / 2)), getRelevantBlockY((ct.y * blkH) + wldPosY + (ct.currentSize / 2)), ct.currentSize, 6)
 end
 
 function drawBlock(blk, x, y)

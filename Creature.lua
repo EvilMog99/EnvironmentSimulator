@@ -2,7 +2,7 @@ require("classlib")
 --creature class
 
 --animalId - Where it can live - Represented by: Body Colour
---  1 = Invertebrate		- Light Blue
+--  1 = Invertebrate		- Light Blue/purple
 --  2 = Fish				- Orange
 --  3 = Amfibian			- Yellow
 --  4 = Reptile				- Light Green
@@ -68,12 +68,12 @@ function Creature:__init(id, x, y, foodA, foodB, attackA, attackB, birthSize, ma
 	self.maxSize = maxSize
 	
 	
-	self.maxHp = 100
+	self.maxHp = 50
 	self.hp = self.maxHp
 	self.visionDis = 5
 	self.moveX = 0
 	self.moveY = 0
-	self.maxSpeed = 0.1
+	self.maxSpeed = 0.2
 	self.checkTimer = -2
 	self.checkTimerMax = 10
 	self.targetX = x
@@ -115,7 +115,7 @@ function Creature:updateSpeed()
 end
 
 function Creature:testIsFood(blk)
-	--test for plankton
+	--test for planktondddddddddddddddd
 	if (self.foodA == -4 or self.foodB == -4) and blk.seaAntLife > 0 then
 		return blk.seaAntLife
 	--test for coral
