@@ -48,6 +48,7 @@ testColR = 0
 mouse_leftDown = false
 mouse_rightDown = false
 
+tempFoodVal = nil
 tempBlk = nil
 testBlk = nil
 
@@ -269,6 +270,8 @@ function love.update(dt)
 					, 1, 0			-- Attack
 					, 1, blkW / 2	-- Size
 					))
+				
+				accessWldBlock(updateCol, j).evolveCreatureId = 0
 			end
 			
 			accessWldBlock(updateCol, j):resetAfterUpdate()
@@ -320,7 +323,53 @@ function love.update(dt)
 	end
 	
 	for key, creature in pairs(allCreatures) do
-		--creature.x = creature.x + creature.walkSpeed
+	
+		--process food and health
+		creature.foodCurrent = creature.foodCurrent - 0.01
+		if creature.foodCurrent < 0 then
+			creature.foodCurrent = 0
+		end
+		if creature.foodCurrent < creature.foodMin then
+			creature.hp = creature.hp - 0.1
+		end
+		
+		if creature.checkTimer <= 0 then
+			creature.checkTimer = creature.checkTimerMax
+			--choose to move !!make circular!!
+			tempFoodVal = 0
+			creature.targetX = 0
+			creature.targetY = 0
+			for i=-creature.visionDis, creature.visionDis, 1 do
+				for j=-creature.visionDis, creature.visionDis, 1 do
+					tempBlk = accessWldBlock(math.floor(creature.x + i), math.floor(creature.y + j))
+					--calculate how much food value this block has to this creature
+					if (creature.foodA == -4 or creature.foodB == -4) and tempBlk.seaAntLife > tempFoodVal then
+						tempFoodVal = tempBlk.seaAntLife
+						creature.targetX = math.floor(creature.x + i)
+						creature.targetY = math.floor(creature.y + j)
+					end
+					
+					--other food tests below
+					
+				end
+			end
+			
+			creature.moveX = (creature.x - creature.targetX) / math.abs(creature.x - creature.targetX)
+			creature.moveY = (creature.y - creature.targetY) / math.abs(creature.y - creature.targetY)
+		else
+			creature.checkTimer = creature.checkTimer - dt
+		end
+		
+		--make move
+		creature.x = creature.x + (creature.maxSpeed * creature.moveX)
+		creature.y = creature.y + (creature.maxSpeed * creature.moveY)
+		creature.foodCurrent = creature.foodCurrent - (creature.maxSpeed * creature.moveX / 2)
+		creature.foodCurrent = creature.foodCurrent - (creature.maxSpeed * creature.moveY / 2)
+		
+		if math.floor(creature.x) == creature.targetX and math.floor(creature.y) == creature.targetY then
+			--eat stuff
+		end
+		tempBlk = accessWldBlock(math.floor(creature.x), math.floor(creature.y))
 		
 		
 		--count creature as type
@@ -352,7 +401,13 @@ function love.update(dt)
 end
 
 function accessWldBlock(x, y)
-	return allBlocks[getRelevantX(x)][getRelevantY(y)]
+	local relx = getRelevantX(x)
+	local rely = getRelevantY(y)
+	if allBlocks == nil or allBlocks[relx] == nil then
+	-- throw error with x, y, relx and rely
+		error("Error: x=" .. x .. " y=" .. y .. " relx=" .. relx .. " rely=" .. rely)
+	end
+	return allBlocks[relx][rely]
 end
 
 function getRelevantX(x)
@@ -468,56 +523,56 @@ function love.draw()
 	
 	local yPos = 11
 	if unlockedSeaAnt then
-		drawPopulationToScreen(seaAntNoInWld[readIndexNoIndexWld], 70, yPos, "Plankton")
+		drawPopulationToScreen(seaAntNoInWld[readIndexNoIndexWld], 10, 70, yPos, "Plankton")
 		yPos = yPos + 11
 	end
 	if unlockedSeaPlant then
-		drawPopulationToScreen(seaPlantNoInWld[readIndexNoIndexWld], 70, yPos, "Coral")
+		drawPopulationToScreen(seaPlantNoInWld[readIndexNoIndexWld], 10, 70, yPos, "Coral")
 		yPos = yPos + 11
 	end
 	if unlockedLandPlant then
-		drawPopulationToScreen(landPlantNoInWld[readIndexNoIndexWld], 70, yPos, "Plants")
+		drawPopulationToScreen(landPlantNoInWld[readIndexNoIndexWld], 10, 70, yPos, "Plants")
 		yPos = yPos + 11
 	end
 	if unlockedLandAnt then
-		drawPopulationToScreen(landAntNoInWld[readIndexNoIndexWld], 70, yPos, "Ants")
+		drawPopulationToScreen(landAntNoInWld[readIndexNoIndexWld], 10, 70, yPos, "Ants")
 		yPos = yPos + 11
 	end
 	
-	yPos = 0
+	yPos = 11
 	if unlockedInvertebrate then
-		drawPopulationToScreen(creatureInvert[readIndexNoIndexWld], 300, yPos, "Invertebrates")
+		drawPopulationToScreen(creatureInvert[readIndexNoIndexWld], 200, 300, yPos, "Invertebrates")
 		yPos = yPos + 11
 	end
 	if unlockedFish then
-		drawPopulationToScreen(creatureFish[readIndexNoIndexWld], 300, yPos, "Fish")
+		drawPopulationToScreen(creatureFish[readIndexNoIndexWld], 200, 300, yPos, "Fish")
 		yPos = yPos + 11
 	end
 	if unlockedAmfibian then
-		drawPopulationToScreen(creatureAmfib[readIndexNoIndexWld], 300, yPos, "Amfibians")
+		drawPopulationToScreen(creatureAmfib[readIndexNoIndexWld], 200, 300, yPos, "Amfibians")
 		yPos = yPos + 11
 	end
 	if unlockedReptile then
-		drawPopulationToScreen(creatureRept[readIndexNoIndexWld], 300, yPos, "Reptiles")
+		drawPopulationToScreen(creatureRept[readIndexNoIndexWld], 200, 300, yPos, "Reptiles")
 		yPos = yPos + 11
 	end
 	if unlockedBird then
-		drawPopulationToScreen(creatureBird[readIndexNoIndexWld], 300, yPos, "Birds")
+		drawPopulationToScreen(creatureBird[readIndexNoIndexWld], 200, 300, yPos, "Birds")
 		yPos = yPos + 11
 	end
 	if unlockedMammal then
-		drawPopulationToScreen(creatureMam[readIndexNoIndexWld], 300, yPos, "Mammals")
+		drawPopulationToScreen(creatureMam[readIndexNoIndexWld], 200, 300, yPos, "Mammals")
 		yPos = yPos + 11
 	end
 end
 
-function drawPopulationToScreen(noInWld, xPos, yPos, str)
+function drawPopulationToScreen(noInWld, textX, xPos, yPos, str)
 	if noInWld > 0 then
 		love.graphics.setColor(0.8, 0.8, 0.8, 1)
 	else
 		love.graphics.setColor(0.6, 0.6, 0.6, 0.5)
 	end
-	love.graphics.print(str .. ":", xPos - 60, yPos)
+	love.graphics.print(str .. ":", textX, yPos)
 	love.graphics.print("" .. noInWld, xPos, yPos)
 end
 
@@ -553,7 +608,7 @@ end
 
 function drawCreature(ct)
 	if ct.id == 1 then 		--Invertebrate
-		love.graphics.setColor(0.8, 0.8, 1.0, 1)
+		love.graphics.setColor(0.6, 0.6, 1.0, 1)
 	elseif ct.id == 2 then	--Fish
 		love.graphics.setColor(0.8, 0.5, 0.0, 1)
 	elseif ct.id == 2 then	--Amfibian

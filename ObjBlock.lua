@@ -251,7 +251,7 @@ function Block:interact(neighbour)
 		neighbour.seaPlantLife = 1 -- create sea plant
 	elseif love.math.random(1, 1000) == 2 and self.seaAntLife > 5 and neighbour.landPlantLife > 5  and neighbour.landAntLife == 0 and neighbour.water > landAntMinWater and neighbour.heat > landAntMinHeat and neighbour.id ~= 0 and neighbour.id ~= 4 then --try to evolve
 		neighbour.landAntLife = 1 -- evolve land ant
-	elseif love.math.random(1, 100) == 2 and self.seaAntLife > 190 and self.seaPlantLife > 190 then
+	elseif love.math.random(1, 1000) == 2 and self.seaAntLife > 190 and self.seaPlantLife > 190 then
 		self.evolveCreatureId = 1 -- evolve Creature (set as 1 for an Invertibrate)
 	end
 

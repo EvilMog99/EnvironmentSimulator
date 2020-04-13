@@ -35,16 +35,19 @@ class "Creature"-- : extends(classlib)
 	animalId, 
 	x, y, --for x and y whole numbers are considered grid positions, decimals are their location in those blocks
 	foodA, foodB,
+	foodMin, foodMax, foodCurrent,
 	attackA, attackB, 
 	birthSize, maxSize, 
 	currentSize, 
+	
+	moveX, moveY,
 	maxHeat, minHeat, maxWater, minWater,
-	walkSpeed, runSpeed,
+	maxSpeed,
+	hp, maxHp,
+	visionDis,
 	
-	
-	
-	
-	
+	checkTimer, checkTimerMax,
+	targetX, targetY,
 }
 
 --also for creature birth
@@ -54,11 +57,26 @@ function Creature:__init(id, x, y, foodA, foodB, attackA, attackB, birthSize, ma
 	self.y = y
 	self.foodA = foodA
 	self.foodB = foodB
+	self.foodMin = 5
+	self.foodMax = 200
+	self.foodCurrent = 100
 	self.attackA = attackA
 	self.attackB = attackB
 	self.birthSize = birthSize
 	self.currentSize = birthSize
 	self.maxSize = maxSize
+	
+	
+	self.maxHp = 100
+	self.hp = self.maxHp
+	self.visionDis = 5
+	self.moveX = 0
+	self.moveY = 0
+	self.maxSpeed = 1
+	self.checkTimer = 0
+	self.checkTimerMax = 10
+	self.targetX = x
+	self.targetY = y
 end
 
 function Creature:getLifeStats()
